@@ -1,0 +1,57 @@
+package com.svail.population_mobility;
+
+import java.util.Vector;
+
+public class CountyPopulation {
+	public double longitude;
+	public double latitude;
+	public String code;
+	public String countyname;
+	public Vector<String> homepois=new Vector();
+	public Vector<String> postpois=new Vector();
+
+	public double getLongitude() {
+		return longitude;
+	}
+
+	public double getLatitude() {
+		return latitude;
+	}
+
+	public String getCode() {
+		return code;
+	}
+	
+	public String getCountyname(){
+		return countyname;
+	}
+	
+	public Vector<String> gethomePois(){
+		return homepois;
+	}
+	public Vector<String> getpostPois(){
+		return postpois;
+	}
+
+	public void setLongitude(double longitude) {
+		this.longitude = longitude;
+	}
+
+	public void setLatitude(double latitude) {
+		this.latitude = latitude;
+	}
+
+	public void setCode(String code) {
+		this.code = code;
+	}
+	public void sethomePois(String poi){
+		homepois.add(poi);
+    }
+	public void setpostPois(String poi){
+		postpois.add(poi);
+    }
+	public void setCountyname(String countyname){
+		this.countyname=countyname;
+	}
+
+}
