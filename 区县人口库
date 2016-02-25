@@ -1,0 +1,152 @@
+package com.svail.population_mobility;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.Scanner;
+import java.util.Set;
+import java.util.Vector;
+
+import com.svail.gridprocess.DataPoint;
+import com.svail.gridprocess.Price;
+import com.svail.population_mobility.CountyPopulation;
+import com.svail.util.FileTool;
+import com.svail.util.Tool;
+
+public class PopulationStatistics {
+	public static String code;
+	public static String countyname;
+	public static String countyLN;
+	public static String countyLA;
+	public static String countyCoor;
+
+	public static void main(String[] args) throws IOException {
+		 SearchCode();	
+
+	}
+	/**
+	 * 查询某个区县的人口情况
+	 * @throws IOException
+	 */
+	public static void SearchCode() throws IOException{
+
+		//将数据存到CountyPopulation中
+		ClassifyStatistic("D:/zhouxiang/人口数据/宾馆数据/行政区划代码/CodeResult.txt");
+		System.out.println("OK!");
+		
+		//从CountyPopulation中查询所需要的数据
+		System.out.println("输入所要查询的区县的行政代码：");
+		Scanner input=new Scanner(System.in);
+		String code=input.next();
+		for(int i=0;i<county.size();i++){
+			if(county.get(i).code.equals(code)){
+				System.out.println("该地区的户籍人口：");
+				for(int k=0;k<county.get(i).homepois.size();k++){
+					
+					System.out.println(county.get(i).homepois.get(k));
+				}
+				System.out.println("拥有该地区通讯地址的人口：");
+				for(int k=0;k<county.get(i).postpois.size();k++){
+					
+					System.out.println(county.get(i).postpois.get(k));
+					
+				}
+				
+				
+			}
+		}
+		
+	}
+   
+    /**
+     * 将每个区县定义成一个county
+     */
+	public static ArrayList<CountyPopulation> county = new ArrayList<CountyPopulation>();
+	 /**
+     * 对每个county进行数据的填充
+     */
+	public static void addCountyPopulation(CountyPopulation cp) {
+		county.add(cp);
+
+	}
+    /**
+     * 分区县统计每个区县的人口记录
+     * @param folder
+     * @throws IOException
+     */
+	public static void ClassifyStatistic(String folder) throws IOException {
+        //设置每个区县的区县代码、区县名字以及坐标
+		File file = new File(folder);
+		FileInputStream fis = new FileInputStream(file);
+		InputStreamReader isr = new InputStreamReader(fis, "UTF-8");
+		BufferedReader reader = null;
+		String tempString = null;
+
+		reader = new BufferedReader(isr);
+		while ((tempString = reader.readLine()) != null) {
+			code=Tool.getStrByKey(tempString, "<Code>", "</Code>", "</Code>");
+			countyname=Tool.getStrByKey(tempString, "<CodeAddr>", "</CodeAddr>", "</CodeAddr>");
+			countyCoor=Tool.getStrByKey(tempString, "<CodeCoor>", "</CodeCoor>", "</CodeCoor>");
+			String[] coor = countyCoor.split(";");
+			countyLN=coor[0];
+			countyLA=coor[1];
+			CountyPopulation cp = new CountyPopulation();
+			//System.out.println(code);
+			cp.setCode(code);
+			//System.out.println(countyname);
+			cp.setCountyname(countyname);
+			double l=Double.parseDouble(countyLN);
+			//System.out.println(l);
+			cp.setLongitude(l);
+			//System.out.println(Double.parseDouble(countyLA));
+			cp.setLatitude(Double.parseDouble(countyLA));
+			addCountyPopulation(cp);
+		}
+        
+		//将人口的户籍地址的代码分配到各个区县
+		File file1 = new File("D:/zhouxiang/人口数据/宾馆数据/人口统计/ResultLean_OK_1_result.txt");
+		FileInputStream fis1 = new FileInputStream(file1);
+		InputStreamReader isr1 = new InputStreamReader(fis1, "UTF-8");
+		BufferedReader reader1 = null;
+		String tempString1 = null;
+
+		reader1 = new BufferedReader(isr1);
+		while ((tempString1 = reader1.readLine()) != null) {
+			
+			String admincode = Tool.getStrByKey(tempString1, "<Code>", "</Code>", "</Code>");
+			for (int i = 0; i < county.size(); i++) {
+				String AdminCode = county.get(i).code;
+				if (admincode.equals(AdminCode)) {
+					county.get(i).sethomePois(tempString1);
+				}
+			}
+			
+			if(tempString1.indexOf("<PostReg>")!=-1){
+				String PostReg = Tool.getStrByKey(tempString1, "<PostReg>", "</PostReg>", "</PostReg>");
+				String[] PostAddr=PostReg.split(",");
+				String addr=(PostAddr[0]+PostAddr[1]+PostAddr[2]).replace("null", "");
+				for (int i = 0; i < county.size(); i++) {
+					if (addr.equals(county.get(i).countyname)) {
+						county.get(i).setpostPois(tempString1);
+					}
+				}
+
+			}
+			
+		}
+		
+		reader1.close();
+		reader.close();
+
+	}
+
+}
