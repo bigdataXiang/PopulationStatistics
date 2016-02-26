@@ -40,7 +40,7 @@ public class PopulationStatistics {
 	public static void SearchCode() throws IOException{
 
 		//将数据存到CountyPopulation中
-		ClassifyStatistic("D:/zhouxiang/人口数据/宾馆数据/行政区划代码/CodeResult.txt");
+		ClassifyStatistic("D:/zhouxiang/人口数据/宾馆数据/人口统计/CodeResult .txt");
 		System.out.println("OK!");
 		
 		//从CountyPopulation中查询所需要的数据
@@ -113,7 +113,8 @@ public class PopulationStatistics {
 		}
         
 		//将人口的户籍地址的代码分配到各个区县
-		File file1 = new File("D:/zhouxiang/人口数据/宾馆数据/人口统计/ResultLean_OK_1_result.txt");
+		File file1 = new File("D:/zhouxiang/人口数据/宾馆数据/精简版需要地址匹配的数据/3_hotel/OK/ResultLean_OK_1_result.txt");
+		
 		FileInputStream fis1 = new FileInputStream(file1);
 		InputStreamReader isr1 = new InputStreamReader(fis1, "UTF-8");
 		BufferedReader reader1 = null;
@@ -133,11 +134,23 @@ public class PopulationStatistics {
 			if(tempString1.indexOf("<PostReg>")!=-1){
 				String PostReg = Tool.getStrByKey(tempString1, "<PostReg>", "</PostReg>", "</PostReg>");
 				String[] PostAddr=PostReg.split(",");
-				String addr=(PostAddr[0]+PostAddr[1]+PostAddr[2]).replace("null", "");
+				String addr=(PostAddr[0]+PostAddr[1]+PostAddr[2]).replace("null", "").replace("苏州工业园区", "吴中区")
+						.replace("汕尾市汕尾市", "汕尾市").replace("黑河市黑河市", "黑河市").replace("重庆市潼南县", "重庆市潼南区")
+						.replace("重庆市县", "重庆市").replace("包头市白云区", "包头市白云鄂博矿区").replace("重庆市荣昌县", "重庆市荣昌区")
+						.replace("桂林市荔浦县", "桂林市荔蒲县").replace("承德市营子矿区", "承德市鹰手营子矿区").replace("乌鲁木齐市东山区", "乌鲁木齐市米东区")
+						.replace("甘肃省临泽县", "甘肃省张掖市临泽县").replace("固原市海原县", "中卫市海原县").replace("吴忠市红寺堡", "吴忠市红寺堡开发区")
+						.replace("广西壮族自治区富川瑶族自治县", "广西壮族自治区贺州市富川瑶族自治县");
+				int count=0;
 				for (int i = 0; i < county.size(); i++) {
 					if (addr.equals(county.get(i).countyname)) {
 						county.get(i).setpostPois(tempString1);
+						break;
+					}else{
+						count++;
 					}
+				}
+				if(count==county.size()){
+					FileTool.Dump(tempString1, "D:/zhouxiang/人口数据/宾馆数据/人口统计/找不到对应行政区划数据.txt", "utf-8");
 				}
 
 			}
