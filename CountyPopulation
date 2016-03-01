@@ -9,6 +9,8 @@ public class CountyPopulation {
 	public String countyname;
 	public Vector<String> homepois=new Vector();
 	public Vector<String> postpois=new Vector();
+	public Vector<String> postcodes=new Vector();
+	public Vector<String> homecodes=new Vector();
 
 	public double getLongitude() {
 		return longitude;
@@ -26,13 +28,21 @@ public class CountyPopulation {
 		return countyname;
 	}
 	
+	
 	public Vector<String> gethomePois(){
 		return homepois;
 	}
 	public Vector<String> getpostPois(){
 		return postpois;
 	}
-
+    public Vector<String> getpostCodes(){
+    	return postcodes;
+    }
+    public Vector<String> gethomeCodes(){
+    	return homecodes;
+    }
+	
+	
 	public void setLongitude(double longitude) {
 		this.longitude = longitude;
 	}
@@ -43,15 +53,22 @@ public class CountyPopulation {
 
 	public void setCode(String code) {
 		this.code = code;
+	}	
+	public void setCountyname(String countyname){
+		this.countyname=countyname;
 	}
+	
 	public void sethomePois(String poi){
 		homepois.add(poi);
     }
 	public void setpostPois(String poi){
 		postpois.add(poi);
     }
-	public void setCountyname(String countyname){
-		this.countyname=countyname;
+	public void setpostCodes(String poi){
+		postcodes.add(poi);
+	}
+	public void sethomeCodes(String poi){
+		homecodes.add(poi);
 	}
 
 }
