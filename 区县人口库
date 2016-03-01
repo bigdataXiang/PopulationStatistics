@@ -44,15 +44,49 @@ public class PopulationStatistics {
 	 */
 	public static void SearchCode() throws IOException {
 
-		System.out.println("将区县数据存到CountyPopulation中：");
-		setCounty("D:/zhouxiang/人口数据/宾馆数据/人口统计/CodeResult .txt");
-		
-		System.out.println("将人口数据存到区县中：");
 		String folder1="D:/人口数据/";
-		for(int i=4;i<=4;i++){
-			String f=folder1+i+"-postCode.txt";
+		for(int j=1;j<=89;j++){
+			System.out.println("第"+j+"次将区县数据存到CountyPopulation中：");
+			setCounty("D:/zhouxiang/人口数据/宾馆数据/人口统计/CodeResult .txt");
+			
+			System.out.println("开始处理第"+j+"个文件：");
+			String f=folder1+j+"-postCode.txt";
 			ClassifyStatistic(f);
 			
+			System.out.println("开始逐个查询：");
+			Vector<String> codes=FileTool.Load("D:/zhouxiang/人口数据/宾馆数据/人口统计/CodeResult .txt", "utf-8");
+			for(int s=0;s<codes.size();s++){
+				String code=Tool.getStrByKey(codes.elementAt(s), "<Code>", "</Code>", "</Code>");
+				for (int i = 0; i < county.size(); i++) {
+					if (county.get(i).code.equals(code)) {
+						//查询该地区的户籍人口
+						//System.out.println(code+"地区的户籍人口：");
+						for (int k = 0; k < county.get(i).homepois.size(); k++) {
+
+							String homeStr=county.get(i).homepois.get(k);
+							//System.out.println(homeStr);
+							
+						}
+		               // System.out.println(county.get(i).getpostCodes());
+		                String postCodes=county.get(i).getpostCodes().toString().replace(", ", ",").replace("[", "").replace("]", "").replace(" ", "");
+		                countFlowout(postCodes,county.get(i).code,folder1);
+		                
+		                //查询拥有该地区通讯地址的人口
+						//System.out.println("拥有"+code+"地区通讯地址的人口：");
+						for (int k = 0; k < county.get(i).postpois.size(); k++) {
+
+							//System.out.println(county.get(i).postpois.get(k));
+
+						}
+						//System.out.println(county.get(i).gethomeCodes());
+						String homeCodes=county.get(i).gethomeCodes().toString().replace(", ", ",").replace("[", "").replace("]", "").replace(" ", "");
+						countFlowin(homeCodes,county.get(i).code,folder1);
+
+					}
+				}
+			}
+			county.clear();
+			System.out.println("第"+j+"次清空county");
 		}
 		//ClassifyStatistic("D:/人口数据/1-postCode.txt");
 		System.out.println("OK!");
@@ -62,38 +96,7 @@ public class PopulationStatistics {
 		//Scanner input = new Scanner(System.in);
 		//String code = input.next();
 		
-		System.out.println("开始逐个查询：");
-		Vector<String> codes=FileTool.Load("D:/zhouxiang/人口数据/宾馆数据/人口统计/CodeResult .txt", "utf-8");
-		for(int s=0;s<codes.size();s++){
-			String code=Tool.getStrByKey(codes.elementAt(s), "<Code>", "</Code>", "</Code>");
-			for (int i = 0; i < county.size(); i++) {
-				if (county.get(i).code.equals(code)) {
-					//查询该地区的户籍人口
-					System.out.println(code+"地区的户籍人口：");
-					for (int k = 0; k < county.get(i).homepois.size(); k++) {
-
-						String homeStr=county.get(i).homepois.get(k);
-						System.out.println(homeStr);
-						
-					}
-	                System.out.println(county.get(i).getpostCodes());
-	                String postCodes=county.get(i).getpostCodes().toString().replace(", ", ",").replace("[", "").replace("]", "");
-	                countFlowout(postCodes,county.get(i).code,folder1);
-	                
-	                //查询拥有该地区通讯地址的人口
-					System.out.println("拥有"+code+"地区通讯地址的人口：");
-					for (int k = 0; k < county.get(i).postpois.size(); k++) {
-
-						System.out.println(county.get(i).postpois.get(k));
-
-					}
-					System.out.println(county.get(i).gethomeCodes());
-					String homeCodes=county.get(i).gethomeCodes().toString().replace(", ", ",").replace("[", "").replace("]", "");
-					countFlowin(homeCodes,county.get(i).code,folder1);
-
-				}
-			}
-		}
+		
 	}
 	/**
 	 * 统计某个区县流向各个地区的人数
@@ -101,23 +104,26 @@ public class PopulationStatistics {
 	 * @param code 该县的行政代码
 	 */
 	public static void countFlowout(String line,String code,String folder){
-		String[] Code=line.split(",");
-		Map<String, Integer> map = new HashMap<String, Integer>();
-        for (String i : Code) {
-            if(map.get(i)!=null){
-                map.put(i, map.get(i)+1);
-            }else{
-                map.put(i, 1);
-            }
-        }
-        for(Entry<String, Integer> entry :map.entrySet()){
-            if(entry.getValue()>0){
-                System.out.println("字符串："+entry.getKey()+";次数:"+entry.getValue());
-                String str="<from>"+code+"</from>"+"<to>"+entry.getKey()+"</to>"+"<amount>"+entry.getValue()+"</amount>";
-                System.out.println(str);
-                FileTool.Dump(str, folder+"countFlowout.txt", "utf-8");
-            }
-        }
+		if(line.indexOf(",")!=-1){
+			String[] Code=line.split(",");
+			Map<String, Integer> map = new HashMap<String, Integer>();
+	        for (String i : Code) {
+	            if(map.get(i)!=null){
+	                map.put(i, map.get(i)+1);
+	            }else{
+	                map.put(i, 1);
+	            }
+	        }
+	        for(Entry<String, Integer> entry :map.entrySet()){
+	            if(entry.getValue()>0){
+	                //System.out.println("字符串："+entry.getKey()+";次数:"+entry.getValue());
+	                String str="<from>"+code+"</from>"+"<to>"+entry.getKey()+"</to>"+"<amount>"+entry.getValue()+"</amount>";
+	               // System.out.println(str);
+	                FileTool.Dump(str, folder+"countFlowout.txt", "utf-8");
+	            }
+	        }
+		}
+		
 	}
 	/**
 	 * 统计流入该县的人口主要来自于哪些地区
@@ -125,23 +131,26 @@ public class PopulationStatistics {
 	 * @param code 该区县的行政代码
 	 */
 	public static void countFlowin(String line,String code,String folder){
-		String[] Code=line.split(",");
-		Map<String, Integer> map = new HashMap<String, Integer>();
-        for (String i : Code) {
-            if(map.get(i)!=null){
-                map.put(i, map.get(i)+1);
-            }else{
-                map.put(i, 1);
+        if(line.indexOf(",")!=-1){
+        	String[] Code=line.split(",");
+    		Map<String, Integer> map = new HashMap<String, Integer>();
+            for (String i : Code) {
+                if(map.get(i)!=null){
+                    map.put(i, map.get(i)+1);
+                }else{
+                    map.put(i, 1);
+                }
             }
-        }
-        for(Entry<String, Integer> entry :map.entrySet()){
-            if(entry.getValue()>0){
-                System.out.println("字符串："+entry.getKey()+";次数:"+entry.getValue());
-                String str="<from>"+entry.getKey()+"</from>"+"<to>"+code+"</to>"+"<amount>"+entry.getValue()+"</amount>";
-                System.out.println(str);
-                FileTool.Dump(str, folder+"countFlowin.txt", "utf-8");
+            for(Entry<String, Integer> entry :map.entrySet()){
+                if(entry.getValue()>0){
+                    //System.out.println("字符串："+entry.getKey()+";次数:"+entry.getValue());
+                    String str="<from>"+entry.getKey()+"</from>"+"<to>"+code+"</to>"+"<amount>"+entry.getValue()+"</amount>";
+                    //System.out.println(str);
+                    FileTool.Dump(str, folder+"countFlowin.txt", "utf-8");
+                }
             }
-        }
+		}
+		
 	}
 
 
@@ -233,8 +242,8 @@ public class PopulationStatistics {
 			}
 
 		}
-
 		reader1.close();
+
 	}
 
 }
