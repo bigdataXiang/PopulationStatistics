@@ -9,11 +9,15 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Scanner;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.Vector;
 
 import com.svail.gridprocess.DataPoint;
@@ -31,7 +35,105 @@ public class PopulationStatistics {
 
 	public static void main(String[] args) throws IOException {
 		SearchCode();
+		// Count();
+		
+		/*
+		 Scanner input = new Scanner(System.in);  
+		 System.out.println("请输入一个字符串:");
+	     String string = input.nextLine();
+	     
+	     System.out.println("请输入一个您想查询的子字符串:");
+	     String str = input.nextLine();
+	     subCounter(string, str);
+	     */
+		//countStr("210702,211102,210702,440304,210702,210702,210711");
 
+	}
+	/**
+	 * 统计某个区县流向各个地区的人数
+	 * @param line 流出去的区县的行政代码集合
+	 * @param code 该县的行政代码
+	 */
+	public static void countFlowout(String line,String code){
+		String[] Code=line.split(",");
+		Map<String, Integer> map = new HashMap<String, Integer>();
+        for (String i : Code) {
+            if(map.get(i)!=null){
+                map.put(i, map.get(i)+1);
+            }else{
+                map.put(i, 1);
+            }
+        }
+        for(Entry<String, Integer> entry :map.entrySet()){
+            if(entry.getValue()>0){
+                System.out.println("字符串："+entry.getKey()+";次数:"+entry.getValue());
+                String str="<from>"+code+"</from>"+"<to>"+entry.getKey()+"</to>"+"<amount>"+entry.getValue()+"</amount>";
+                System.out.println(str);
+            }
+        }
+	}
+	/**
+	 * 统计流入该县的人口主要来自于哪些地区
+	 * @param line 流入该县的人口来源地的行政区划代码集合
+	 * @param code 该区县的行政代码
+	 */
+	public static void countFlowin(String line,String code){
+		String[] Code=line.split(",");
+		Map<String, Integer> map = new HashMap<String, Integer>();
+        for (String i : Code) {
+            if(map.get(i)!=null){
+                map.put(i, map.get(i)+1);
+            }else{
+                map.put(i, 1);
+            }
+        }
+        for(Entry<String, Integer> entry :map.entrySet()){
+            if(entry.getValue()>0){
+                System.out.println("字符串："+entry.getKey()+";次数:"+entry.getValue());
+                String str="<from>"+entry.getKey()+"</from>"+"<to>"+code+"</to>"+"<amount>"+entry.getValue()+"</amount>";
+                System.out.println(str);
+            }
+        }
+	}
+	/*
+	 * 统计某个字符串的个数
+	 */
+	public static void subCounter(String str1, String str2) {
+		 
+        int counter = 0;
+        for (int i = 0; i <= str1.length() - str2.length(); i++) {
+            if (str1.substring(i, i + str2.length()).equalsIgnoreCase(str2)) {
+                counter++;
+            }
+        }
+        System.out.println("子字符串的个数为： " + counter);
+ 
+    }
+	/*
+	 * 统计某个字符的个数
+	 */
+	public static void Count(){
+		  
+		  Scanner input = new Scanner(System.in);  
+		  System.out.println("请输入一段字符：");  
+		  String str = input.nextLine();  
+		    
+		  Map<Character,Integer> oos = new TreeMap<Character,Integer>();  
+		  for(int i=0;i<str.length();i++){  
+		       char ch = str.charAt(i);  
+		        if(!oos.containsKey(ch)) {  
+		    
+		             oos.put(ch, 1);                      
+		      }else{  
+		          int auto =oos.get(ch)+1;             
+		          oos.put(ch, auto);  
+		          }  
+		  }    
+		       Iterator<Character> ois = oos.keySet().iterator();           
+		  while(ois.hasNext()){             
+		        char temp = ois.next();            
+		          System.out.println(temp+"="+oos.get(temp));  
+		  }  
 	}
 
 	/**
@@ -41,28 +143,42 @@ public class PopulationStatistics {
 	 */
 	public static void SearchCode() throws IOException {
 
-		// 将数据存到CountyPopulation中
-		ClassifyStatistic("D:/zhouxiang/人口数据/宾馆数据/人口统计/CodeResult .txt");
+		System.out.println("将区县数据存到CountyPopulation中：");
+		setCounty("D:/zhouxiang/人口数据/宾馆数据/人口统计/CodeResult .txt");
+		
+		System.out.println("将人口数据存到区县中：");
+		ClassifyStatistic("D:/人口数据/1-postCode.txt");
 		System.out.println("OK!");
 
 		// 从CountyPopulation中查询所需要的数据
 		System.out.println("输入所要查询的区县的行政代码：");
 		Scanner input = new Scanner(System.in);
 		String code = input.next();
+		
 		for (int i = 0; i < county.size(); i++) {
 			if (county.get(i).code.equals(code)) {
+				//查询该地区的户籍人口
 				System.out.println("该地区的户籍人口：");
 				for (int k = 0; k < county.get(i).homepois.size(); k++) {
 
-					System.out.println(county.get(i).homepois.get(k));
+					String homeStr=county.get(i).homepois.get(k);
+					System.out.println(homeStr);
+					
 				}
-
+                System.out.println(county.get(i).getpostCodes());
+                String postCodes=county.get(i).getpostCodes().toString().replace(", ", ",").replace("[", "").replace("]", "");
+                countFlowout(postCodes,county.get(i).code);
+                
+                //查询拥有该地区通讯地址的人口
 				System.out.println("拥有该地区通讯地址的人口：");
 				for (int k = 0; k < county.get(i).postpois.size(); k++) {
 
 					System.out.println(county.get(i).postpois.get(k));
 
 				}
+				System.out.println(county.get(i).gethomeCodes());
+				String homeCodes=county.get(i).gethomeCodes().toString().replace(", ", ",").replace("[", "").replace("]", "");
+				countFlowin(homeCodes,county.get(i).code);
 
 			}
 		}
@@ -81,7 +197,44 @@ public class PopulationStatistics {
 		county.add(cp);
 
 	}
+    public static void setCounty(String folder){
+    
+    	try {	
+    	// 设置每个区县的区县代码、区县名字以及坐标
+    		File file = new File(folder);
+    		FileInputStream fis;
+			fis = new FileInputStream(file);
+		
+    		InputStreamReader isr = new InputStreamReader(fis, "UTF-8");
+    		BufferedReader reader = null;
+    		String tempString = null;
 
+    		reader = new BufferedReader(isr);
+    		while ((tempString = reader.readLine()) != null) {
+    			code = Tool.getStrByKey(tempString, "<Code>", "</Code>", "</Code>");
+    			countyname = Tool.getStrByKey(tempString, "<CodeAddr>", "</CodeAddr>", "</CodeAddr>");
+    			countyCoor = Tool.getStrByKey(tempString, "<CodeCoor>", "</CodeCoor>", "</CodeCoor>");
+    			String[] coor = countyCoor.split(";");
+    			countyLN = coor[0];
+    			countyLA = coor[1];
+    			CountyPopulation cp = new CountyPopulation();
+    			cp.setCode(code);
+    			cp.setCountyname(countyname);
+    			double l = Double.parseDouble(countyLN);
+    			cp.setLongitude(l);
+    			cp.setLatitude(Double.parseDouble(countyLA));
+    			addCountyPopulation(cp);
+    		}
+    		reader.close();
+    	} catch (FileNotFoundException e) {
+ 				// TODO Auto-generated catch block
+ 				e.printStackTrace();
+ 			} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	
+    }
 	/**
 	 * 分区县统计每个区县的人口记录
 	 * 
@@ -89,36 +242,8 @@ public class PopulationStatistics {
 	 * @throws IOException
 	 */
 	public static void ClassifyStatistic(String folder) throws IOException {
-		// 设置每个区县的区县代码、区县名字以及坐标
-		File file = new File(folder);
-		FileInputStream fis = new FileInputStream(file);
-		InputStreamReader isr = new InputStreamReader(fis, "UTF-8");
-		BufferedReader reader = null;
-		String tempString = null;
-
-		reader = new BufferedReader(isr);
-		while ((tempString = reader.readLine()) != null) {
-			code = Tool.getStrByKey(tempString, "<Code>", "</Code>", "</Code>");
-			countyname = Tool.getStrByKey(tempString, "<CodeAddr>", "</CodeAddr>", "</CodeAddr>");
-			countyCoor = Tool.getStrByKey(tempString, "<CodeCoor>", "</CodeCoor>", "</CodeCoor>");
-			String[] coor = countyCoor.split(";");
-			countyLN = coor[0];
-			countyLA = coor[1];
-			CountyPopulation cp = new CountyPopulation();
-			// System.out.println(code);
-			cp.setCode(code);
-			// System.out.println(countyname);
-			cp.setCountyname(countyname);
-			double l = Double.parseDouble(countyLN);
-			// System.out.println(l);
-			cp.setLongitude(l);
-			// System.out.println(Double.parseDouble(countyLA));
-			cp.setLatitude(Double.parseDouble(countyLA));
-			addCountyPopulation(cp);
-		}
-
 		// 将人口的户籍地址的代码分配到各个区县
-		File file1 = new File("D:/人口数据/6-postCode.txt");
+		File file1 = new File(folder);
 
 		FileInputStream fis1 = new FileInputStream(file1);
 		InputStreamReader isr1 = new InputStreamReader(fis1, "UTF-8");
@@ -129,40 +254,27 @@ public class PopulationStatistics {
 		while ((tempString1 = reader1.readLine()) != null) {
 
 			String admincode = Tool.getStrByKey(tempString1, "<Code>", "</Code>", "</Code>");
-			String postcode= Tool.getStrByKey(tempString1, "<PostCode>", "</PostCode>", "</PostCode>");
-           /*
-			if (tempString1.indexOf("<PostReg>") != -1) {
-				String PostReg = Tool.getStrByKey(tempString1, "<PostReg>", "</PostReg>", "</PostReg>");
-				String[] PostAddr = PostReg.split(",");
-				String addr = (PostAddr[0] + PostAddr[1] + PostAddr[2]).replace("null", "").replace("苏州工业园区", "吴中区")
-						.replace("汕尾市汕尾市", "汕尾市").replace("黑河市黑河市", "黑河市").replace("重庆市潼南县", "重庆市潼南区")
-						.replace("重庆市县", "重庆市").replace("包头市白云区", "包头市白云鄂博矿区").replace("重庆市荣昌县", "重庆市荣昌区")
-						.replace("桂林市荔浦县", "桂林市荔蒲县").replace("承德市营子矿区", "承德市鹰手营子矿区").replace("乌鲁木齐市东山区", "乌鲁木齐市米东区")
-						.replace("甘肃省临泽县", "甘肃省张掖市临泽县").replace("固原市海原县", "中卫市海原县").replace("吴忠市红寺堡", "吴忠市红寺堡开发区")
-						.replace("广西壮族自治区富川瑶族自治县", "广西壮族自治区贺州市富川瑶族自治县").replace("甘肃省肃州区", "甘肃省酒泉市肃州区")
-						.replace("甘肃省静宁县", "甘肃省平凉市静宁县").replace("甘肃省灵台县", "甘肃省平凉市灵台县").replace("", "").replace("", "")
-						.replace("", "");
-              */     
-				for (int i = 0; i < county.size(); i++) {
-					String AdminCode = county.get(i).code;
-					if (admincode.equals(AdminCode)) {
-						county.get(i).sethomePois(tempString1);
-						break;
-					}
+			String postcode = Tool.getStrByKey(tempString1, "<PostCode>", "</PostCode>", "</PostCode>");
+			for (int i = 0; i < county.size(); i++) {
+				String Code = county.get(i).code;
+				if (admincode.equals(Code)) {
+					county.get(i).sethomePois(tempString1);
+					county.get(i).setpostCodes(postcode);
+					break;
 				}
-				for (int i = 0; i < county.size(); i++) {
-					String AdminCode=county.get(i).code;
-					if (postcode.equals(AdminCode)) {
-						county.get(i).setpostPois(tempString1);
-						break;
-					} 
+			}
+			for (int i = 0; i < county.size(); i++) {
+				String Code = county.get(i).code;
+				if (postcode.equals(Code)) {
+					county.get(i).setpostPois(tempString1);
+					county.get(i).sethomeCodes(admincode);
+					break;
 				}
-
 			}
 
-		reader1.close();
-		reader.close();
+		}
 
+		reader1.close();
 	}
 
 }
