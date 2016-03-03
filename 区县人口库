@@ -15,6 +15,11 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.Scanner;
 import java.util.Set;
 import java.util.TreeMap;
@@ -23,6 +28,7 @@ import java.util.Vector;
 import com.svail.gridprocess.DataPoint;
 import com.svail.gridprocess.Price;
 import com.svail.population_mobility.CountyPopulation;
+import com.svail.test.Demo;
 import com.svail.util.FileTool;
 import com.svail.util.Tool;
 
@@ -34,8 +40,235 @@ public class PopulationStatistics {
 	public static String countyCoor;
 
 	public static void main(String[] args) throws IOException {
-		SearchCode();		
+		//SearchCode();		
+		countAmount("D:/人口数据/countFlowin-tidy.txt");
+		System.out.println("ok!");
 	}
+	/**
+	 * 统计最终一个区县的人流动到另外一个区县去的总人数，将重复的流向区县的数目叠加
+	 * @param folder
+	 */
+	public static void countAmount(String folder) {
+		String poi ="";
+		try{
+			Vector<String> Pois = FileTool.Load(folder, "utf-8");
+			Map<String, Integer> map = new HashMap<String, Integer>();
+			System.out.println("begin:");
+			for (int a = 0; a < Pois.size(); a++) {
+				poi = Pois.elementAt(a);
+				String from = Tool.getStrByKey(poi, "<from>", "</from>", "</from>");
+				String to = Tool.getStrByKey(poi, "<to>", "</to>", "</to>");
+				int amount = Integer.parseInt(Tool.getStrByKey(poi, "<amount>", "</amount>", "</amount>"));
+				String index="";
+				if (a == 0) {
+					map.put(from, amount);
+				}else {
+					index=Tool.getStrByKey(Pois.elementAt(a-1), "<to>", "</to>", "</to>");
+					if(to.equals(index)){
+					//对每个区域逐个统计
+						int count=0;
+						for (int b = 0; b <a; b++) {
+							String probe = Tool.getStrByKey(Pois.elementAt(b), "<from>", "</from>", "</from>");
+							if (from.equals(probe)) {
+								if(map.get(probe) != null){
+									int s = map.get(probe);
+									map.put(probe, s + amount);
+									break;
+								}else{
+									map.put(from, amount);
+								}
+							}else{
+								count++;
+							}
+						}
+						if(count==a){
+							map.put(from, amount);
+						}
+						int s=Pois.size();
+						if((a+1)==s){
+							for (Map.Entry<String, Integer> entry : map.entrySet()) {
+								String key = entry.getKey().toString();
+								String value = entry.getValue().toString();
+								String str="<from>"+key+"</from>"+"<to>"+index+"</to>"+"<amounts>"+value+"</amounts>";
+								//System.out.println(str);
+								FileTool.Dump(str, folder.replace(".txt", "")+"-countAmounts.txt", "utf-8");
+							}
+						}
+					
+					}else{
+						for (Map.Entry<String, Integer> entry : map.entrySet()) {
+							String key = entry.getKey().toString();
+							String value = entry.getValue().toString();
+							String str="<from>"+key+"</from>"+"<to>"+index+"</to>"+"<amounts>"+value+"</amounts>";
+							//System.out.println(str);
+							FileTool.Dump(str, folder.replace(".txt", "")+"-countAmounts.txt", "utf-8");
+						}
+						map.clear();
+						map.put(from, amount);
+					}
+					
+				}
+			}
+		}catch(NullPointerException e){
+			System.out.println(e.getMessage());
+			FileTool.Dump(poi, folder.replace(".txt", "")+"-exception.txt", "utf-8");
+		}
+		
+	}
+	/**
+	 * 按照区县顺序整理从某个区县流动到另外一个区县的记录，这里不包括统一目的地的数量叠加
+	 * @param codefolder
+	 * @param countfoder
+	 */
+	public static void countTo(String codefolder, String countfoder) {
+		try {
+			File file = new File(codefolder);
+			FileInputStream fis = new FileInputStream(file);
+			InputStreamReader isr = new InputStreamReader(fis, "UTF-8");
+			BufferedReader reader = null;
+			String tempString = null;
+			reader = new BufferedReader(isr);
+			while ((tempString = reader.readLine()) != null) {
+
+				Vector<String> countfile = FileTool.Load(countfoder, "utf-8");
+				for (int i = 0; i < countfile.size(); i++) {
+					String poi = countfile.elementAt(i);
+					Demo demo = new Demo(poi);
+					String code = Tool.getStrByKey(tempString, "<Code>", "</Code>", "</Code>");
+					if (code.equals(demo.from)) {
+						System.out.println(poi);
+						FileTool.Dump(poi, countfoder.replace(".txt", "") + "-tidy.txt", "utf-8");
+					}
+
+				}
+
+			}
+			reader.close();
+
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	/**
+	 * 将人口数据转成Jason格式
+	 * @param folder
+	 */
+	public static void productJson(String folder) {
+
+		JSONObject jsonObj = new JSONObject();// 创建json格式的数据
+		JSONArray jsonArr = new JSONArray();// json格式的数组
+
+		try {
+			File file = new File(folder);
+			FileInputStream fis = new FileInputStream(file);
+			InputStreamReader isr = new InputStreamReader(fis, "UTF-8");
+			BufferedReader reader = null;
+			String tempString = null;
+
+			reader = new BufferedReader(isr);
+			while ((tempString = reader.readLine()) != null) {
+				Demo demo = new Demo(tempString);
+				JSONObject jsonObjArr = new JSONObject();
+
+				jsonObjArr.put("from", demo.code);
+				jsonObjArr.put("to", demo.PostCode);
+
+			}
+
+			// 将json格式的数据放到json格式的数组里
+
+			// jsonObj.put("Points", jsonObjArr);//再将这个json格式的的数组放到最终的json对象中。
+
+			// System.out.println(jsonArr);
+			System.out.println("开始写入txt中");
+			FileTool.Dump(jsonArr.toString(), folder + "peopleJson .txt", "utf-8");
+
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+	/**
+	 * 统计最终一个区县的人流动到另外一个区县去的总人数，将重复的流向区县的数目叠加,不过该算法太慢了，果断抛弃
+	 * @param codefolder
+	 * @param countfile
+	 */
+	  public static void countAmounts(String codefolder,String countfile){
+	    	try {
+	    	    String Code="";
+				File file = new File(codefolder);
+				FileInputStream fis = new FileInputStream(file);
+				InputStreamReader isr = new InputStreamReader(fis, "UTF-8");
+				BufferedReader reader = null;
+				String tempString = null;
+
+				reader = new BufferedReader(isr);
+				while ((tempString = reader.readLine()) != null) {
+					Code=Tool.getStrByKey(tempString, "<Code>", "</Code>", "</Code>");
+					Vector<String> CodePois=FileTool.Load(codefolder, "utf-8");
+					for(int i=0;i<CodePois.size();i++){
+						String probe=Tool.getStrByKey(CodePois.elementAt(i),"<Code>", "</Code>", "</Code>");
+						Vector<String> countFile=FileTool.Load(countfile, "utf-8");
+						int amounts=0;
+						for(int k=0;k<countFile.size();k++){
+							String poi=countFile.elementAt(k);
+							String from=Tool.getStrByKey(poi, "<from>", "</from>", "</from>");
+							String to=Tool.getStrByKey(poi, "<to>", "</to>", "</to>").replace(" ", "");
+							String amount=Tool.getStrByKey(poi, "<amount>", "</amount>", "</amount>");
+							int n=Integer.parseInt(amount); 
+							//System.out.println(to);
+							//System.out.println(Code);
+							if(from.equals(Code)){
+								if(probe.equals(to)){
+									amounts+=n;
+						     }
+						}
+					 }
+					if(amounts!=0){
+						String total="<from>"+Code+"</from>"+"<to>"+probe+"</to>"+"<amounts>"+amounts+"</amounts>";
+						FileTool.Dump(total, countfile.replace(".txt", "")+"-countAmounts.txt", "utf-8");
+					}
+					System.out.println("完成"+Code+"区域"+ probe+"的统计");
+				}
+				
+				//System.out.println("");
+				}
+				reader.close();
+			}catch (NullPointerException e1) {
+				e1.printStackTrace();
+				e1.getMessage();
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (UnsupportedEncodingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}catch(NumberFormatException e){
+				e.printStackTrace();
+			}
+
+	    	
+	    }
 
 	/**
 	 * 查询某个区县的人口情况
