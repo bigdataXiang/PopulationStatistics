@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -41,18 +42,140 @@ public class PopulationStatistics {
 
 	public static void main(String[] args) throws IOException {
 		// SearchCode();
-		countTotalAmount("D:/人口数据/Task/countFlowout-tidy-countAmounts.txt");
+		// countTotalAmount("D:/人口数据/Task/countFlowout-tidy-countAmounts.txt");
+
+		// getSortFlow("D:/人口数据/Task/countFlowin-tidy-countAmounts.txt");
+
+		//getMainIngredients("D:/人口数据/Task/countFlowin-tidy-countAmounts-sort.txt");
+		
+		ProductJson("D:/人口数据/Task/countFlowout-tidy-countAmounts-sort-MainIngredients.txt");
 		System.out.println("ok!");
 	}
+	public static void ProductJson(String Folder) {
+		JSONObject jsonObj = new JSONObject();// 创建json格式的数据
 
-	/**
-	 * 统计最终一个区县的人流动到另外一个区县去的总人数，将重复的流向区县的数目叠加
-	 * @param folder
-	 */
-	public static void countTotalAmount(String folder) {
+		JSONArray jsonArr = new JSONArray();// json格式的数组
 
-		String poi ="";
-		try{
+		try {
+			Vector<String> rds = FileTool.Load(Folder, "UTF-8");
+			for (int i = 0; i < rds.size(); i++) {
+				String element = rds.elementAt(i);
+				JsonData jsondata = new JsonData(element);
+				JSONObject jsonObjArr = new JSONObject();
+
+				jsonObjArr.put("from", jsondata.from);
+				jsonObjArr.put("to", jsondata.to);
+				jsonObjArr.put("amounts", jsondata.amounts);
+				jsonArr.put(jsonObjArr);
+
+			}
+			System.out.println("开始写入txt中");
+			FileTool.Dump(jsonArr.toString(), Folder.replace(".txt", "")+"-Json.txt", "utf-8");
+
+		} catch (JSONException e) {
+
+			// TODO Auto-generated catch block
+
+			e.printStackTrace();
+
+		}
+
+	}
+
+	@SuppressWarnings("unchecked")
+	public static void getMainIngredients(String folder) {
+
+		String poi = "";
+		try {
+			Vector<String> Pois = FileTool.Load(folder, "utf-8");
+			List<Integer> Amounts = new ArrayList<Integer>();
+			List<String> FromTo = new ArrayList<String>();
+			System.out.println("begin:");
+			for (int a = 0; a < Pois.size(); a++) {
+				poi = Pois.elementAt(a);
+				String from = Tool.getStrByKey(poi, "<from>", "</from>", "</from>");
+				String to = Tool.getStrByKey(poi, "<to>", "</to>", "</to>");
+				int amount = Integer.parseInt(Tool.getStrByKey(poi, "<amounts>", "</amounts>", "</amounts>"));
+
+				String index = "";
+				if (a == 0) {
+			
+					Amounts.add(0,amount);
+					FromTo.add(0,poi);
+
+				} else {
+					index = Tool.getStrByKey(Pois.elementAt(a - 1), "<to>", "</to>", "</to>"); //from和to
+					int counter = 0;
+					if (to.equals(index)) { ////from和to
+						// 对每个区域逐个统计分析
+						if (to.equals(Tool.getStrByKey(Pois.elementAt(0), "<to>", "</to>", "</to>"))) {//from和to
+							counter++;
+							Amounts.add(counter,amount);
+							FromTo.add(counter,poi);
+						} else {
+
+							Amounts.add(counter,amount);
+							FromTo.add(counter,poi);
+							counter++;
+						}
+
+						int s = Pois.size();
+						if ((a + 1) == s) {
+							int num = Amounts.size();
+							double average=0;
+							if (Amounts.size() > 3) {
+								average = (Amounts.get(1) + Amounts.get(2) + Amounts.get(3))/30;
+							} else {
+								average = Amounts.get(0);
+							}
+							for (int i = 0; i < Amounts.size(); i++) {
+								double db = Amounts.get(i);
+								if (db > average) {
+									System.out.println(FromTo.get(i));
+									FileTool.Dump(FromTo.get(i), folder.replace(".txt", "") + "-MainIngredients.txt",
+											"utf-8");
+								}
+							}
+						}
+
+					} else {
+						int num = Amounts.size();
+						double average;
+						if (Amounts.size() > 3) {
+							average =((Amounts.get(1) + Amounts.get(2) + Amounts.get(3))/30);
+						} else {
+							average = Amounts.get(0);
+						}
+
+						for (int i = 0; i < Amounts.size(); i++) {
+							double db = Amounts.get(i);
+							if (db > average) {
+								System.out.println(FromTo.get(i));
+								FileTool.Dump(FromTo.get(i), folder.replace(".txt", "") + "-MainIngredients.txt", "utf-8");
+							}
+						}
+						Amounts.clear();
+						FromTo.clear();
+						
+						Amounts.add(0, amount);
+						FromTo.add(0, poi);
+						
+
+					}
+
+				}
+			}
+		} catch (NullPointerException e) {
+			System.out.println(e.getMessage());
+			FileTool.Dump(poi, folder.replace(".txt", "") + "-exception.txt", "utf-8");
+		}
+
+	}
+
+	public static void getSortFlow(String folder) {
+
+		String poi = "";
+		try {
 			Vector<String> Pois = FileTool.Load(folder, "utf-8");
 			Map<String, Integer> map = new HashMap<String, Integer>();
 			System.out.println("begin:");
@@ -61,85 +184,178 @@ public class PopulationStatistics {
 				String from = Tool.getStrByKey(poi, "<from>", "</from>", "</from>");
 				String to = Tool.getStrByKey(poi, "<to>", "</to>", "</to>");
 				int amount = Integer.parseInt(Tool.getStrByKey(poi, "<amounts>", "</amounts>", "</amounts>"));
-				String index="";
+				String index = "";
 				if (a == 0) {
-					//if(!(from.equals(to))){
-						map.put(to, amount);
-				//	}
-					
-				}else {
-					index=Tool.getStrByKey(Pois.elementAt(a-1), "<from>", "</from>", "</from>");
-					if(from.equals(index)){
-					//对每个区域逐个统计	
-						//if(!(from.equals(to))){
-							map.put(to, amount);
-					//	}
-                        
-
-						int s=Pois.size();
-						if((a+1)==s){
-							int[] totalAmounts=new int[map.size()];
-							int counts=0;
-							String key ="";
-							int Total=0;
-							for (Map.Entry<String, Integer> entry : map.entrySet()) {
-								//key = entry.getKey().toString();
-								//String value = entry.getValue().toString();
-								int value = entry.getValue();
-								totalAmounts[counts]=value;
-								counts++;
-								
-								//String str="<from>"+key+"</from>"+"<to>"+index+"</to>"+"<amounts>"+value+"</amounts>";
-								//System.out.println(str);
-								//FileTool.Dump(str, folder.replace(".txt", "")+"-countAmounts.txt", "utf-8");
-							}
-							for(int i=0;i<totalAmounts.length;i++){
-								Total+=totalAmounts[i];
-							}
-							String str="<from>"+index+"</from>"+"<amounts>"+Total+"</amounts>";
-							System.out.println(str);
-							FileTool.Dump(str, folder.replace(".txt", "")+"-countTotalAmounts.txt", "utf-8");
-						}
-					
-					}else{
-						int[] totalAmounts=new int[map.size()];
-						int counts=0;
-						String key ="";
-						int Total=0;
-						for (Map.Entry<String, Integer> entry : map.entrySet()) {
-							//key = entry.getKey().toString();
-							//String value = entry.getValue().toString();
-							int value = entry.getValue();
-							totalAmounts[counts]=value;
-							counts++;
-							
-							//String str="<from>"+key+"</from>"+"<to>"+index+"</to>"+"<amounts>"+value+"</amounts>";
-							//System.out.println(str);
-							//FileTool.Dump(str, folder.replace(".txt", "")+"-countAmounts.txt", "utf-8");
-						}
-						for(int i=0;i<totalAmounts.length;i++){
-							Total+=totalAmounts[i];
-						}
-						String str="<from>"+index+"</from>"+"<amounts>"+Total+"</amounts>";
-						System.out.println(str);
-						FileTool.Dump(str, folder.replace(".txt", "")+"-countTotalAmounts.txt", "utf-8");
-					
-						map.clear();
-					//	if(!(from.equals(to))){
-							map.put(to, amount);
-					//	}
-						
+					if (!(from.equals(to))) {
+						map.put(from, amount);//from和to
 					}
-					
+
+				} else {
+					index = Tool.getStrByKey(Pois.elementAt(a - 1), "<to>", "</to>", "</to>");//from和to
+					if (to.equals(index)) {  //from和to
+						// 对每个区域逐个统计分析
+						if (!(from.equals(to))) {
+							map.put(from, amount); //from和to
+						}
+
+						int s = Pois.size();
+						if ((a + 1) == s) {
+							int[] Amounts = new int[map.size()];
+							String[] FromTo = new String[map.size()];
+							int counts = 0;
+							String key = "";
+							for (Map.Entry<String, Integer> entry : map.entrySet()) {
+								key = entry.getKey().toString();
+								// String value = entry.getValue().toString();
+								int value = entry.getValue();
+								Amounts[counts] = value;
+								FromTo[counts] = "<from>" + key + "</from>" + "<to>" + index + "</to>" + "<amounts>" //from和to
+										+ value + "</amounts>";
+								counts++;
+							}
+							Tool.InsertSortArray(Amounts.length, Amounts, FromTo);
+							for (int i = 0; i < FromTo.length; i++) {
+								System.out.println(FromTo[i]);
+								FileTool.Dump(FromTo[i], folder.replace(".txt", "") + "-sort.txt", "utf-8");
+							}
+						}
+
+					} else {
+
+						int[] Amounts = new int[map.size()];
+						String[] FromTo = new String[map.size()];
+						int counts = 0;
+						String key = "";
+						for (Map.Entry<String, Integer> entry : map.entrySet()) {
+							key = entry.getKey().toString();
+							// String value = entry.getValue().toString();
+							int value = entry.getValue();
+							Amounts[counts] = value;
+							FromTo[counts] = "<from>" + key + "</from>" + "<to>" + index + "</to>" + "<amounts>" + value //from和to
+									+ "</amounts>";
+							counts++;
+
+							
+						}
+						Tool.InsertSortArray(Amounts.length, Amounts, FromTo);
+						for (int i = 0; i < FromTo.length; i++) {
+							System.out.println(FromTo[i]);
+							FileTool.Dump(FromTo[i], folder.replace(".txt", "") + "-sort.txt", "utf-8");
+						}
+
+						map.clear();
+						if (!(from.equals(to))) {
+							map.put(to, amount);
+						}
+
+					}
+
 				}
 			}
-		}catch(NullPointerException e){
+		} catch (NullPointerException e) {
 			System.out.println(e.getMessage());
-			FileTool.Dump(poi, folder.replace(".txt", "")+"-exception.txt", "utf-8");
+			FileTool.Dump(poi, folder.replace(".txt", "") + "-exception.txt", "utf-8");
 		}
-		
-	
-		
+
+	}
+
+	/**
+	 * 统计最终一个区县的人流动到另外一个区县去的总人数，将重复的流向区县的数目叠加
+	 * 
+	 * @param folder
+	 */
+	public static void countTotalAmount(String folder) {
+
+		String poi = "";
+		try {
+			Vector<String> Pois = FileTool.Load(folder, "utf-8");
+			Map<String, Integer> map = new HashMap<String, Integer>();
+			System.out.println("begin:");
+			for (int a = 0; a < Pois.size(); a++) {
+				poi = Pois.elementAt(a);
+				String from = Tool.getStrByKey(poi, "<from>", "</from>", "</from>");
+				String to = Tool.getStrByKey(poi, "<to>", "</to>", "</to>");
+				int amount = Integer.parseInt(Tool.getStrByKey(poi, "<amounts>", "</amounts>", "</amounts>"));
+				String index = "";
+				if (a == 0) {
+					// if(!(from.equals(to))){
+					map.put(to, amount);
+					// }
+
+				} else {
+					index = Tool.getStrByKey(Pois.elementAt(a - 1), "<from>", "</from>", "</from>");
+					if (from.equals(index)) {
+						// 对每个区域逐个统计
+						// if(!(from.equals(to))){
+						map.put(to, amount);
+						// }
+
+						int s = Pois.size();
+						if ((a + 1) == s) {
+							int[] totalAmounts = new int[map.size()];
+							int counts = 0;
+							String key = "";
+							int Total = 0;
+							for (Map.Entry<String, Integer> entry : map.entrySet()) {
+								// key = entry.getKey().toString();
+								// String value = entry.getValue().toString();
+								int value = entry.getValue();
+								totalAmounts[counts] = value;
+								counts++;
+
+								// String
+								// str="<from>"+key+"</from>"+"<to>"+index+"</to>"+"<amounts>"+value+"</amounts>";
+								// System.out.println(str);
+								// FileTool.Dump(str, folder.replace(".txt",
+								// "")+"-countAmounts.txt", "utf-8");
+							}
+							for (int i = 0; i < totalAmounts.length; i++) {
+								Total += totalAmounts[i];
+							}
+							String str = "<from>" + index + "</from>" + "<amounts>" + Total + "</amounts>";
+							System.out.println(str);
+							FileTool.Dump(str, folder.replace(".txt", "") + "-countTotalAmounts.txt", "utf-8");
+						}
+
+					} else {
+						int[] totalAmounts = new int[map.size()];
+						int counts = 0;
+						String key = "";
+						int Total = 0;
+						for (Map.Entry<String, Integer> entry : map.entrySet()) {
+							// key = entry.getKey().toString();
+							// String value = entry.getValue().toString();
+							int value = entry.getValue();
+							totalAmounts[counts] = value;
+							counts++;
+
+							// String
+							// str="<from>"+key+"</from>"+"<to>"+index+"</to>"+"<amounts>"+value+"</amounts>";
+							// System.out.println(str);
+							// FileTool.Dump(str, folder.replace(".txt",
+							// "")+"-countAmounts.txt", "utf-8");
+						}
+						for (int i = 0; i < totalAmounts.length; i++) {
+							Total += totalAmounts[i];
+						}
+						String str = "<from>" + index + "</from>" + "<amounts>" + Total + "</amounts>";
+						System.out.println(str);
+						FileTool.Dump(str, folder.replace(".txt", "") + "-countTotalAmounts.txt", "utf-8");
+
+						map.clear();
+						// if(!(from.equals(to))){
+						map.put(to, amount);
+						// }
+
+					}
+
+				}
+			}
+		} catch (NullPointerException e) {
+			System.out.println(e.getMessage());
+			FileTool.Dump(poi, folder.replace(".txt", "") + "-exception.txt", "utf-8");
+		}
+
 	}
 
 	public static void countAmount(String folder) {
@@ -286,56 +502,6 @@ public class PopulationStatistics {
 		}
 	}
 
-	/**
-	 * 将人口数据转成Jason格式
-	 * 
-	 * @param folder
-	 */
-	public static void productJson(String folder) {
-
-		JSONObject jsonObj = new JSONObject();// 创建json格式的数据
-		JSONArray jsonArr = new JSONArray();// json格式的数组
-
-		try {
-			File file = new File(folder);
-			FileInputStream fis = new FileInputStream(file);
-			InputStreamReader isr = new InputStreamReader(fis, "UTF-8");
-			BufferedReader reader = null;
-			String tempString = null;
-
-			reader = new BufferedReader(isr);
-			while ((tempString = reader.readLine()) != null) {
-				Demo demo = new Demo(tempString);
-				JSONObject jsonObjArr = new JSONObject();
-
-				jsonObjArr.put("from", demo.code);
-				jsonObjArr.put("to", demo.PostCode);
-
-			}
-
-			// 将json格式的数据放到json格式的数组里
-
-			// jsonObj.put("Points", jsonObjArr);//再将这个json格式的的数组放到最终的json对象中。
-
-			// System.out.println(jsonArr);
-			System.out.println("开始写入txt中");
-			FileTool.Dump(jsonArr.toString(), folder + "peopleJson .txt", "utf-8");
-
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-	}
 
 	/**
 	 * 统计最终一个区县的人流动到另外一个区县去的总人数，将重复的流向区县的数目叠加,不过该算法太慢了，果断抛弃
