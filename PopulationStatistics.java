@@ -46,11 +46,87 @@ public class PopulationStatistics {
 
 		// getSortFlow("D:/人口数据/Task/countFlowin-tidy-countAmounts.txt");
 
-		//getMainIngredients("D:/人口数据/Task/countFlowin-tidy-countAmounts-sort.txt");
+		// getMainIngredients("D:/人口数据/Task/countFlowout-tidy-countAmounts-sort.txt");
+
+		// ProductJson("D:/人口数据/Task/countFlowout-tidy-countAmounts-sort-MainIngredients.txt");
 		
-		ProductJson("D:/人口数据/Task/countFlowout-tidy-countAmounts-sort-MainIngredients.txt");
+		getMax("D:/人口数据/Task/countFlowin-tidy-countAmounts-sort-MainIngredients.txt");
 		System.out.println("ok!");
 	}
+
+	public static void getMax(String folder) {
+
+		String poi = "";
+		try {
+			Vector<String> Pois = FileTool.Load(folder, "utf-8");
+			List<Integer> Amounts = new ArrayList<Integer>();
+			List<String> FromTo = new ArrayList<String>();
+			System.out.println("begin:");
+			for (int a = 0; a < Pois.size(); a++) {
+				poi = Pois.elementAt(a);
+				String from = Tool.getStrByKey(poi, "<from>", "</from>", "</from>");
+				String to = Tool.getStrByKey(poi, "<to>", "</to>", "</to>");
+				int amount = Integer.parseInt(Tool.getStrByKey(poi, "<amounts>", "</amounts>", "</amounts>"));
+
+				String index = "";
+				if (a == 0) {
+
+					Amounts.add(0, amount);
+					FromTo.add(0, poi);
+
+				} else {
+					index = Tool.getStrByKey(Pois.elementAt(a - 1), "<to>", "</to>", "</to>"); // from和to
+					int counter = 0;
+					if (to.equals(index)) { //// from和to
+						// 对每个区域逐个统计分析
+						if (to.equals(Tool.getStrByKey(Pois.elementAt(0), "<to>", "</to>", "</to>"))) {// from和to
+							counter++;
+							Amounts.add(counter, amount);
+							FromTo.add(counter, poi);
+						} else {
+
+							Amounts.add(counter, amount);
+							FromTo.add(counter, poi);
+							counter++;
+						}
+
+						int s = Pois.size();
+						if ((a + 1) == s) {
+							double max = 0;
+							String maxStr="";
+							max = Amounts.get(Amounts.size()-1);
+							maxStr=FromTo.get(Amounts.size()-1);
+							System.out.println(maxStr);
+							FileTool.Dump(maxStr, folder.replace(".txt", "") + "-Max.txt",
+											"utf-8");
+							
+						}
+
+					} else {
+						double max = 0;
+						String maxStr="";
+						max = Amounts.get(Amounts.size()-1);
+						maxStr=FromTo.get(Amounts.size()-1);
+						System.out.println(maxStr);
+						FileTool.Dump(maxStr, folder.replace(".txt", "") + "-Max.txt",
+										"utf-8");
+						Amounts.clear();
+						FromTo.clear();
+
+						Amounts.add(0, amount);
+						FromTo.add(0, poi);
+
+					}
+
+				}
+			}
+		} catch (NullPointerException e) {
+			System.out.println(e.getMessage());
+			FileTool.Dump(poi, folder.replace(".txt", "") + "-exception.txt", "utf-8");
+		}
+
+	}
+
 	public static void ProductJson(String Folder) {
 		JSONObject jsonObj = new JSONObject();// 创建json格式的数据
 
@@ -70,7 +146,7 @@ public class PopulationStatistics {
 
 			}
 			System.out.println("开始写入txt中");
-			FileTool.Dump(jsonArr.toString(), Folder.replace(".txt", "")+"-Json.txt", "utf-8");
+			FileTool.Dump(jsonArr.toString(), Folder.replace(".txt", "") + "-Json.txt", "utf-8");
 
 		} catch (JSONException e) {
 
@@ -99,32 +175,35 @@ public class PopulationStatistics {
 
 				String index = "";
 				if (a == 0) {
-			
-					Amounts.add(0,amount);
-					FromTo.add(0,poi);
+
+					Amounts.add(0, amount);
+					FromTo.add(0, poi);
 
 				} else {
-					index = Tool.getStrByKey(Pois.elementAt(a - 1), "<to>", "</to>", "</to>"); //from和to
+					index = Tool.getStrByKey(Pois.elementAt(a - 1), "<from>", "</from>", "</from>"); // from和to
 					int counter = 0;
-					if (to.equals(index)) { ////from和to
+					if (from.equals(index)) { //// from和to
 						// 对每个区域逐个统计分析
-						if (to.equals(Tool.getStrByKey(Pois.elementAt(0), "<to>", "</to>", "</to>"))) {//from和to
+						if (from.equals(Tool.getStrByKey(Pois.elementAt(0), "<from>", "</from>", "</from>"))) {// from和to
 							counter++;
-							Amounts.add(counter,amount);
-							FromTo.add(counter,poi);
+							Amounts.add(counter, amount);
+							FromTo.add(counter, poi);
 						} else {
 
-							Amounts.add(counter,amount);
-							FromTo.add(counter,poi);
+							Amounts.add(counter, amount);
+							FromTo.add(counter, poi);
 							counter++;
 						}
 
 						int s = Pois.size();
 						if ((a + 1) == s) {
 							int num = Amounts.size();
-							double average=0;
+							double average = 0;
 							if (Amounts.size() > 3) {
-								average = (Amounts.get(1) + Amounts.get(2) + Amounts.get(3))/30;
+								int a1=Amounts.get(1);
+								int b=Amounts.get(2);
+								int c= Amounts.get(3);
+								average = (Amounts.get(1) + Amounts.get(2) + Amounts.get(3)) / 30;
 							} else {
 								average = Amounts.get(0);
 							}
@@ -132,7 +211,7 @@ public class PopulationStatistics {
 								double db = Amounts.get(i);
 								if (db > average) {
 									System.out.println(FromTo.get(i));
-									FileTool.Dump(FromTo.get(i), folder.replace(".txt", "") + "-MainIngredients.txt",
+									FileTool.Dump(FromTo.get(i), folder.replace(".txt", "") + "-MainIngredients1111.txt",
 											"utf-8");
 								}
 							}
@@ -142,7 +221,10 @@ public class PopulationStatistics {
 						int num = Amounts.size();
 						double average;
 						if (Amounts.size() > 3) {
-							average =((Amounts.get(1) + Amounts.get(2) + Amounts.get(3))/30);
+							int a1=Amounts.get(1);
+							int b=Amounts.get(2);
+							int c= Amounts.get(3);
+							average = ((Amounts.get(1) + Amounts.get(2) + Amounts.get(3)) / 30);
 						} else {
 							average = Amounts.get(0);
 						}
@@ -151,15 +233,15 @@ public class PopulationStatistics {
 							double db = Amounts.get(i);
 							if (db > average) {
 								System.out.println(FromTo.get(i));
-								FileTool.Dump(FromTo.get(i), folder.replace(".txt", "") + "-MainIngredients.txt", "utf-8");
+								FileTool.Dump(FromTo.get(i), folder.replace(".txt", "") + "-MainIngredients1111.txt",
+										"utf-8");
 							}
 						}
 						Amounts.clear();
 						FromTo.clear();
-						
+
 						Amounts.add(0, amount);
 						FromTo.add(0, poi);
-						
 
 					}
 
@@ -187,15 +269,15 @@ public class PopulationStatistics {
 				String index = "";
 				if (a == 0) {
 					if (!(from.equals(to))) {
-						map.put(from, amount);//from和to
+						map.put(from, amount);// from和to
 					}
 
 				} else {
-					index = Tool.getStrByKey(Pois.elementAt(a - 1), "<to>", "</to>", "</to>");//from和to
-					if (to.equals(index)) {  //from和to
+					index = Tool.getStrByKey(Pois.elementAt(a - 1), "<to>", "</to>", "</to>");// from和to
+					if (to.equals(index)) { // from和to
 						// 对每个区域逐个统计分析
 						if (!(from.equals(to))) {
-							map.put(from, amount); //from和to
+							map.put(from, amount); // from和to
 						}
 
 						int s = Pois.size();
@@ -209,7 +291,7 @@ public class PopulationStatistics {
 								// String value = entry.getValue().toString();
 								int value = entry.getValue();
 								Amounts[counts] = value;
-								FromTo[counts] = "<from>" + key + "</from>" + "<to>" + index + "</to>" + "<amounts>" //from和to
+								FromTo[counts] = "<from>" + key + "</from>" + "<to>" + index + "</to>" + "<amounts>" // from和to
 										+ value + "</amounts>";
 								counts++;
 							}
@@ -231,11 +313,10 @@ public class PopulationStatistics {
 							// String value = entry.getValue().toString();
 							int value = entry.getValue();
 							Amounts[counts] = value;
-							FromTo[counts] = "<from>" + key + "</from>" + "<to>" + index + "</to>" + "<amounts>" + value //from和to
+							FromTo[counts] = "<from>" + key + "</from>" + "<to>" + index + "</to>" + "<amounts>" + value // from和to
 									+ "</amounts>";
 							counts++;
 
-							
 						}
 						Tool.InsertSortArray(Amounts.length, Amounts, FromTo);
 						for (int i = 0; i < FromTo.length; i++) {
@@ -501,7 +582,6 @@ public class PopulationStatistics {
 			e.printStackTrace();
 		}
 	}
-
 
 	/**
 	 * 统计最终一个区县的人流动到另外一个区县去的总人数，将重复的流向区县的数目叠加,不过该算法太慢了，果断抛弃
