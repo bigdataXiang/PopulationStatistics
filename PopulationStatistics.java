@@ -39,6 +39,7 @@ public class PopulationStatistics {
 	public static String countyLN;
 	public static String countyLA;
 	public static String countyCoor;
+	public static String codeReg;
 
 	public static void main(String[] args) throws IOException {
 		// SearchCode();
@@ -50,10 +51,52 @@ public class PopulationStatistics {
 
 		// ProductJson("D:/人口数据/Task/countFlowout-tidy-countAmounts-sort-MainIngredients.txt");
 		
-		getMax("D:/人口数据/Task/countFlowin-tidy-countAmounts-sort-MainIngredients.txt");
+		//getMax("D:/人口数据/Task/countFlowin-tidy-countAmounts-sort-MainIngredients.txt");
+
+		CheckRepeatCode("D:/人口数据/Task/排查重复code/countFlowin-tidy-countAmounts-sort-MainIngredients-Max.txt");
+		
 		System.out.println("ok!");
 	}
-
+    public static void CheckRepeatCode(String folder){
+    	String poi = "";
+    	try {
+    		setCounty("D:/人口数据/Task/排查重复code/CodeResult.txt");
+    		Vector<String> Pois = FileTool.Load(folder, "utf-8");
+    		for (int a = 0; a < Pois.size(); a++) {
+    			poi =Pois.elementAt(a);
+    			String from = Tool.getStrByKey(poi, "<from>", "</from>", "</from>");
+				String to = Tool.getStrByKey(poi, "<to>", "</to>", "</to>");
+				String frompoi="";
+				String topoi="";
+				String fromReg="";
+				String toReg="";
+				for(int i=0;i<county.size();i++){
+					String code=county.get(i).code;
+					if(from.equals(code)){
+						fromReg=county.get(i).codereg.replace("null", "").replace(",", "");
+						frompoi="<from>"+from+"</from>"+"<fromName>"+county.get(i).countyname+"</fromName>";
+					}
+				}
+				for(int i=0;i<county.size();i++){
+					String code=county.get(i).code;
+					if(to.equals(code)){
+						toReg=county.get(i).codereg.replace("null", "").replace(",", "");
+						topoi="<to>"+to+"</to>"+"<toName>"+county.get(i).countyname+"</toName>"
+			                    +"<toReg>"+toReg+"<toReg>";
+					}
+				}
+				if(fromReg.equals(toReg)){
+					System.out.println(frompoi+topoi);
+					FileTool.Dump(frompoi+topoi, folder.replace(".txt", "")+"-重复code2.txt", "utf-8");
+				}
+    		}
+    		
+    	}catch (NullPointerException e) {
+			System.out.println(e.getMessage());
+			FileTool.Dump(poi, folder.replace(".txt", "") + "-exception.txt", "utf-8");
+		}
+    	
+    }
 	public static void getMax(String folder) {
 
 		String poi = "";
@@ -806,12 +849,14 @@ public class PopulationStatistics {
 				code = Tool.getStrByKey(tempString, "<Code>", "</Code>", "</Code>");
 				countyname = Tool.getStrByKey(tempString, "<CodeAddr>", "</CodeAddr>", "</CodeAddr>");
 				countyCoor = Tool.getStrByKey(tempString, "<CodeCoor>", "</CodeCoor>", "</CodeCoor>");
+				codeReg=Tool.getStrByKey(tempString, "<CodeReg>", "</CodeReg>", "</CodeReg>");
 				String[] coor = countyCoor.split(";");
 				countyLN = coor[0];
 				countyLA = coor[1];
 				CountyPopulation cp = new CountyPopulation();
 				cp.setCode(code);
 				cp.setCountyname(countyname);
+				cp.setCodeReg(codeReg);
 				double l = Double.parseDouble(countyLN);
 				cp.setLongitude(l);
 				cp.setLatitude(Double.parseDouble(countyLA));
