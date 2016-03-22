@@ -50,53 +50,165 @@ public class PopulationStatistics {
 		// getMainIngredients("D:/人口数据/Task/countFlowout-tidy-countAmounts-sort.txt");
 
 		// ProductJson("D:/人口数据/Task/countFlowout-tidy-countAmounts-sort-MainIngredients.txt");
-		
-		//getMax("D:/人口数据/Task/countFlowin-tidy-countAmounts-sort-MainIngredients.txt");
 
-		CheckRepeatCode("D:/人口数据/Task/排查重复code/countFlowin-tidy-countAmounts-sort-MainIngredients-Max.txt");
+		// getMax("D:/人口数据/Task/countFlowin-tidy-countAmounts-sort-MainIngredients.txt");
+
+		// CheckRepeatCode("D:/人口数据/Task/排查重复code/countFlowin-tidy-countAmounts-sort-MainIngredients-Max.txt");
 		
+		GatherBigCity("D:/人口数据/Task/汇总大城市各区/ex.txt");
+
 		System.out.println("ok!");
 	}
-    public static void CheckRepeatCode(String folder){
-    	String poi = "";
-    	try {
-    		setCounty("D:/人口数据/Task/排查重复code/CodeResult.txt");
-    		Vector<String> Pois = FileTool.Load(folder, "utf-8");
-    		for (int a = 0; a < Pois.size(); a++) {
-    			poi =Pois.elementAt(a);
-    			String from = Tool.getStrByKey(poi, "<from>", "</from>", "</from>");
+
+	public static void GatherBigCity(String folder) {
+		String poi = "";
+		// Tool.ID_Hashtable("D:/人口数据/Task/汇总大城市各区/bigcityCode.txt");
+		Map<String, Integer> map = new HashMap<String, Integer>();
+		try {
+			Vector<String> Pois = FileTool.Load(folder, "utf-8");
+			int tempNum=0;
+			for (int a = 0; a < Pois.size(); a++) {
+				poi = Pois.elementAt(a);
+				String from = Tool.getStrByKey(poi, "<from>", "</from>", "</from>");
 				String to = Tool.getStrByKey(poi, "<to>", "</to>", "</to>");
-				String frompoi="";
-				String topoi="";
-				String fromReg="";
-				String toReg="";
-				for(int i=0;i<county.size();i++){
-					String code=county.get(i).code;
-					if(from.equals(code)){
-						fromReg=county.get(i).codereg.replace("null", "").replace(",", "");
-						frompoi="<from>"+from+"</from>"+"<fromName>"+county.get(i).countyname+"</fromName>";
+				int amount = Integer.parseInt(Tool.getStrByKey(poi, "<amounts>", "</amounts>", "</amounts>"));
+				int tolen=to.length();
+				String subto="";
+				int sub;
+				if(to.indexOf("1101")!=-1){
+					 subto=to.substring(2, tolen-2);
+					 sub=Integer.parseInt(subto);
+				}else{
+					subto=to.substring(0,4);
+					sub=Integer.parseInt(subto);
+				}
+				
+				
+				int citycode ;
+				String city = "";
+				Vector<String> CityPois = FileTool.Load("D:/人口数据/Task/汇总大城市各区/bigcityCode.txt", "utf-8");
+				int tag=0;
+				int CityPoisindex;
+				for (CityPoisindex=0; CityPoisindex < CityPois.size();) {
+					//判断sub是否已经找到过合适的code，如果找到了则不执行if里面的语句，没找到才执行
+					if(tag==0){
+						city = CityPois.elementAt(CityPoisindex);
+						citycode = Integer.parseInt(Tool.getStrByKey(city, "<code>", "</code>", "</code>"));				
+						if (sub==citycode) {
+							tag++;   //表示该sub找到了合适的code
+							// 对每个区域逐个统计
+							int count = 0;
+							for (int b =0; b < a; b++) {
+								String probe = Tool.getStrByKey(Pois.elementAt(b), "<from>", "</from>", "</from>");
+								if (from.equals(probe)){
+									if ((map.get(probe) != null)) {//如果前一组数中有两个code与这一组数的code相同，则会有问题
+										int s = map.get(probe);
+										map.put(probe, s + amount);
+										tempNum++;    //表示该poi被处理
+										break;              //跳出最里层循环
+									}else{
+										map.put(from, amount);
+										break;  
+									}
+								}else{
+									count++;
+								}
+								
+							}
+							if (count == a) {
+								map.put(from, amount);
+								break;
+							}
+						} else {
+							CityPoisindex++;
+							String before=Tool.getStrByKey(Pois.elementAt(a-1), "<to>", "</to>", "</to>"); //上一次执行的poi
+							int beforelen=before.length();
+							String subbefore="";
+							int subindex=0;
+							if(before.indexOf("1101")!=-1){
+								 subbefore=before.substring(2, beforelen-2);
+								 subindex=Integer.parseInt(subbefore);
+							}else{
+								subbefore=before.substring(0,4);
+								subindex=Integer.parseInt(subbefore);
+							}
+							//判断此次的sub与上次是否相同，如果不同则把上次的map值全都打印出来，然后再清空
+							if(sub!=subindex){
+								String key = "";
+								for (Map.Entry<String, Integer> entry : map.entrySet()) {
+									key = entry.getKey().toString();
+									int value = entry.getValue();
+									
+									String str="<from>"+key+"</from>"+"<to>"+subindex+"</to>"+"<amounts>"+value+"</amounts>";
+									System.out.println(str);
+									FileTool.Dump(str, folder.replace(".txt", "")+"-gatherBigCity.txt", "utf-8");
+								}
+								map.clear();
+							   //map.put(from, amount);
+							}						
+							
+						}
+					}else{
+						break;
 					}
+					
+
 				}
-				for(int i=0;i<county.size();i++){
-					String code=county.get(i).code;
-					if(to.equals(code)){
-						toReg=county.get(i).codereg.replace("null", "").replace(",", "");
-						topoi="<to>"+to+"</to>"+"<toName>"+county.get(i).countyname+"</toName>"
-			                    +"<toReg>"+toReg+"<toReg>";
-					}
+				if(CityPoisindex==CityPois.size()){
+					System.out.println(poi);
+					FileTool.Dump(poi, folder.replace(".txt", "")+"-gatherBigCity.txt", "utf-8");
 				}
-				if(fromReg.equals(toReg)){
-					System.out.println(frompoi+topoi);
-					FileTool.Dump(frompoi+topoi, folder.replace(".txt", "")+"-重复code2.txt", "utf-8");
-				}
-    		}
-    		
-    	}catch (NullPointerException e) {
+
+			}
+
+		} catch (NullPointerException e) {
 			System.out.println(e.getMessage());
 			FileTool.Dump(poi, folder.replace(".txt", "") + "-exception.txt", "utf-8");
 		}
-    	
-    }
+
+	}
+
+	public static void CheckRepeatCode(String folder) {
+		String poi = "";
+		try {
+			setCounty("D:/人口数据/Task/排查重复code/CodeResult.txt");
+			Vector<String> Pois = FileTool.Load(folder, "utf-8");
+			for (int a = 0; a < Pois.size(); a++) {
+				poi = Pois.elementAt(a);
+				String from = Tool.getStrByKey(poi, "<from>", "</from>", "</from>");
+				String to = Tool.getStrByKey(poi, "<to>", "</to>", "</to>");
+				String frompoi = "";
+				String topoi = "";
+				String fromReg = "";
+				String toReg = "";
+				for (int i = 0; i < county.size(); i++) {
+					String code = county.get(i).code;
+					if (from.equals(code)) {
+						fromReg = county.get(i).codereg.replace("null", "").replace(",", "");
+						frompoi = "<from>" + from + "</from>" + "<fromName>" + county.get(i).countyname + "</fromName>";
+					}
+				}
+				for (int i = 0; i < county.size(); i++) {
+					String code = county.get(i).code;
+					if (to.equals(code)) {
+						toReg = county.get(i).codereg.replace("null", "").replace(",", "");
+						topoi = "<to>" + to + "</to>" + "<toName>" + county.get(i).countyname + "</toName>" + "<toReg>"
+								+ toReg + "<toReg>";
+					}
+				}
+				if (fromReg.equals(toReg)) {
+					System.out.println(frompoi + topoi);
+					FileTool.Dump(frompoi + topoi, folder.replace(".txt", "") + "-重复code2.txt", "utf-8");
+				}
+			}
+
+		} catch (NullPointerException e) {
+			System.out.println(e.getMessage());
+			FileTool.Dump(poi, folder.replace(".txt", "") + "-exception.txt", "utf-8");
+		}
+
+	}
+
 	public static void getMax(String folder) {
 
 		String poi = "";
@@ -136,23 +248,21 @@ public class PopulationStatistics {
 						int s = Pois.size();
 						if ((a + 1) == s) {
 							double max = 0;
-							String maxStr="";
-							max = Amounts.get(Amounts.size()-1);
-							maxStr=FromTo.get(Amounts.size()-1);
+							String maxStr = "";
+							max = Amounts.get(Amounts.size() - 1);
+							maxStr = FromTo.get(Amounts.size() - 1);
 							System.out.println(maxStr);
-							FileTool.Dump(maxStr, folder.replace(".txt", "") + "-Max.txt",
-											"utf-8");
-							
+							FileTool.Dump(maxStr, folder.replace(".txt", "") + "-Max.txt", "utf-8");
+
 						}
 
 					} else {
 						double max = 0;
-						String maxStr="";
-						max = Amounts.get(Amounts.size()-1);
-						maxStr=FromTo.get(Amounts.size()-1);
+						String maxStr = "";
+						max = Amounts.get(Amounts.size() - 1);
+						maxStr = FromTo.get(Amounts.size() - 1);
 						System.out.println(maxStr);
-						FileTool.Dump(maxStr, folder.replace(".txt", "") + "-Max.txt",
-										"utf-8");
+						FileTool.Dump(maxStr, folder.replace(".txt", "") + "-Max.txt", "utf-8");
 						Amounts.clear();
 						FromTo.clear();
 
@@ -243,9 +353,9 @@ public class PopulationStatistics {
 							int num = Amounts.size();
 							double average = 0;
 							if (Amounts.size() > 3) {
-								int a1=Amounts.get(1);
-								int b=Amounts.get(2);
-								int c= Amounts.get(3);
+								int a1 = Amounts.get(1);
+								int b = Amounts.get(2);
+								int c = Amounts.get(3);
 								average = (Amounts.get(1) + Amounts.get(2) + Amounts.get(3)) / 30;
 							} else {
 								average = Amounts.get(0);
@@ -254,8 +364,8 @@ public class PopulationStatistics {
 								double db = Amounts.get(i);
 								if (db > average) {
 									System.out.println(FromTo.get(i));
-									FileTool.Dump(FromTo.get(i), folder.replace(".txt", "") + "-MainIngredients1111.txt",
-											"utf-8");
+									FileTool.Dump(FromTo.get(i),
+											folder.replace(".txt", "") + "-MainIngredients1111.txt", "utf-8");
 								}
 							}
 						}
@@ -264,9 +374,9 @@ public class PopulationStatistics {
 						int num = Amounts.size();
 						double average;
 						if (Amounts.size() > 3) {
-							int a1=Amounts.get(1);
-							int b=Amounts.get(2);
-							int c= Amounts.get(3);
+							int a1 = Amounts.get(1);
+							int b = Amounts.get(2);
+							int c = Amounts.get(3);
 							average = ((Amounts.get(1) + Amounts.get(2) + Amounts.get(3)) / 30);
 						} else {
 							average = Amounts.get(0);
@@ -849,7 +959,7 @@ public class PopulationStatistics {
 				code = Tool.getStrByKey(tempString, "<Code>", "</Code>", "</Code>");
 				countyname = Tool.getStrByKey(tempString, "<CodeAddr>", "</CodeAddr>", "</CodeAddr>");
 				countyCoor = Tool.getStrByKey(tempString, "<CodeCoor>", "</CodeCoor>", "</CodeCoor>");
-				codeReg=Tool.getStrByKey(tempString, "<CodeReg>", "</CodeReg>", "</CodeReg>");
+				codeReg = Tool.getStrByKey(tempString, "<CodeReg>", "</CodeReg>", "</CodeReg>");
 				String[] coor = countyCoor.split(";");
 				countyLN = coor[0];
 				countyLA = coor[1];
