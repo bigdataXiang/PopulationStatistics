@@ -57,10 +57,62 @@ public class PopulationStatistics {
 		
 		//GatherBigCity("D:/人口数据/Task/汇总大城市各区/countFlowin-tidy-countAmounts-sort.txt");
 		
-		countAmount("D:/人口数据/四级数据-统计某区县流入或者流出的另一区县的总人口/countFlowin-tidy.txt");
+		countAmount("D:/人口数据/4级数据-统计某区县流入或者流出的另一区县的总人口/countFlowin-tidy.txt");
 
 		System.out.println("ok!");
 	}
+	
+	/**
+	 * 通过检查countFlowout.txt文件中每个区县的poi条数来找出多出的poi
+	 */
+	public static void Check_countFlowout(String folder){
+		String poi="";
+		setCounty("D:/zhouxiang/人口数据/宾馆数据/人口统计/CodeResult.txt");
+		Vector<String> Pois = FileTool.Load(folder, "utf-8");
+		for (int a = 0; a < Pois.size(); a++) {
+			poi = Pois.elementAt(a);
+			String from = Tool.getStrByKey(poi, "<from>", "</from>", "</from>");
+			for (int i = 0; i < county.size(); i++) {
+				if(from.equals(county.get(i).code)){
+					county.get(i).setPoiamounts(1);
+				}
+			}
+		}
+		int acount=0;
+		for (int i = 0; i < county.size(); i++) {
+			System.out.println(county.get(i).poiamounts);
+			
+			for(int k=0;k<county.get(i).poiamounts.size();k++){
+				acount+=county.get(i).poiamounts.get(k);	
+			}
+			System.out.println(county.get(i).code+":"+acount);
+			FileTool.Dump(county.get(i).code+":"+acount, folder+"", "utf-8");
+			acount=0;
+		}
+	}
+	/**
+	 * 通过检查-tidy.txt文件中每个区县的poi条数来找出多出的poi
+	 */
+	public static void Check_countFlowout_tidy(String folder){
+		String poi = "";
+		int count=1;
+		Vector<String> Pois = FileTool.Load(folder, "utf-8");
+		for (int a = 0; a < Pois.size(); a++) {
+			poi = Pois.elementAt(a);
+			String from = Tool.getStrByKey(poi, "<from>", "</from>", "</from>");
+			String beforefrom="";
+			if(a>0){
+				beforefrom=Tool.getStrByKey(Pois.elementAt(a-1), "<from>", "</from>", "</from>");
+				if(from.equals(beforefrom)){
+					count++;
+				}else{
+					System.out.println(beforefrom+":"+count);
+					count=0;
+				}
+			}
+		}
+	}
+	
 	/**
 	 *利用countFlowin-tidy-countAmounts-sort.txt文件和bigcityCode.txt文件，将主要省会城市的code合并起来，重新对数据进行统计
 	 * @param folder
@@ -73,7 +125,7 @@ public class PopulationStatistics {
 		try {
 			Vector<String> Pois = FileTool.Load(folder, "utf-8");
 			int tempNum=0;
-			for (int a = 717402; a < Pois.size(); a++) {
+			for (int a = 0; a < Pois.size(); a++) {
 				poi = Pois.elementAt(a);
 				String from = Tool.getStrByKey(poi, "<from>", "</from>", "</from>");
 				String to = Tool.getStrByKey(poi, "<to>", "</to>", "</to>");
@@ -813,14 +865,14 @@ public class PopulationStatistics {
 		String folder1 = "D:/人口数据/";
 		for (int j = 1; j <= 89; j++) {
 			System.out.println("第" + j + "次将区县数据存到CountyPopulation中：");
-			setCounty("D:/zhouxiang/人口数据/宾馆数据/人口统计/CodeResult .txt");
+			setCounty("D:/zhouxiang/人口数据/宾馆数据/人口统计/CodeResult.txt");
 
 			System.out.println("开始处理第" + j + "个文件：");
 			String f = folder1 + j + "-postCode.txt";
 			ClassifyStatistic(f);
 
 			System.out.println("开始逐个查询：");
-			Vector<String> codes = FileTool.Load("D:/zhouxiang/人口数据/宾馆数据/人口统计/CodeResult .txt", "utf-8");
+			Vector<String> codes = FileTool.Load("D:/zhouxiang/人口数据/宾馆数据/人口统计/CodeResult.txt", "utf-8");
 			for (int s = 0; s < codes.size(); s++) {
 				String code = Tool.getStrByKey(codes.elementAt(s), "<Code>", "</Code>", "</Code>");
 				for (int i = 0; i < county.size(); i++) {
