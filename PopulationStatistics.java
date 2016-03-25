@@ -61,7 +61,69 @@ public class PopulationStatistics {
 
 		System.out.println("ok!");
 	}
-	
+	/**
+	 * 比较两个文件中的记录是否相同，并且将相同的记录写下来，从而找出两个文件是否存在不相同的记录
+	 * @param folder1
+	 * @param folder2
+	 */
+		public static void CompareAmouts(String folder1, String folder2) {
+			Map<String, Integer> map1 = new HashMap<String, Integer>();
+			Map<String, Integer> map2 = new HashMap<String, Integer>();
+			String poi1 = "";
+			String poi2 = "";
+			Vector<String> Pois1 = FileTool.Load(folder1, "utf-8");
+			for (int a1 = 0; a1 < Pois1.size(); a1++) {
+				poi1 = Pois1.elementAt(a1);
+				String[] arr1 = poi1.split(":");
+				map1.put(arr1[0], Integer.parseInt(arr1[1]));
+			}
+			Vector<String> Pois2 = FileTool.Load(folder2, "utf-8");
+			for (int a2 = 0; a2 < Pois2.size(); a2++) {
+				poi2 = Pois2.elementAt(a2);
+				String[] arr2 = poi2.split(":");
+				if(map2.get(arr2[0])!=null){
+					int s=map2.get(arr2[0]);
+					System.out.println(arr2[0]+":"+s+arr2[1]);
+					map2.put(arr2[0], Integer.parseInt(s+arr2[1]));
+				}else{
+					map2.put(arr2[0], Integer.parseInt(arr2[1]));
+				}
+			    map2.put(arr2[0], Integer.parseInt(arr2[1]));
+			}
+				Iterator<String> it1 = map1.keySet().iterator();
+				System.out.println("map1.size()="+map1.size());
+				while (it1.hasNext()) {
+
+					String key1;
+					int value1;
+
+					key1 = (String) it1.next();
+					value1 = map1.get(key1);
+
+					//System.out.println("map1-" + key1 + ":" + value1);
+					Iterator<String> it2 = map2.keySet().iterator();
+					System.out.println("map2.size()="+map2.size());
+					while (it2.hasNext()) {
+						String key2;
+						int value2;
+						key2 = (String) it2.next();
+						value2 = map2.get(key2);
+						//System.out.println("map2-" + key2 + ":" + value2);
+						if ((key1.equals(key2)) && (value1 == value2)) {
+							//FileTool.Dump(key1 + ":" + value1, "D:/人口数据/3级数据-统计人口流入流出数据/key1=key2.txt", "utf-8");
+							//FileTool.Dump(key2 + ":" + value2, "D:/人口数据/3级数据-统计人口流入流出数据/key2.txt", "utf-8");
+							it2.remove();
+							break;
+						}else if((key1.equals(key2)) && (value1 != value2)){
+							System.out.println("map1-" + key1 + ":" + value1);
+							System.out.println("map2-" + key2 + ":" + value2);
+							break;
+	                     }
+					}
+	               
+
+				}
+			}
 	/**
 	 * 通过检查countFlowout.txt文件中每个区县的poi条数来找出多出的poi
 	 */
