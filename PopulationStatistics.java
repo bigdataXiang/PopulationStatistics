@@ -54,129 +54,242 @@ public class PopulationStatistics {
 		// getMax("D:/人口数据/Task/countFlowin-tidy-countAmounts-sort-MainIngredients.txt");
 
 		// CheckRepeatCode("D:/人口数据/Task/排查重复code/countFlowin-tidy-countAmounts-sort-MainIngredients-Max.txt");
-		
-		//GatherBigCity("D:/人口数据/Task/汇总大城市各区/countFlowin-tidy-countAmounts-sort.txt");
-		
-		countAmount("D:/人口数据/4级数据-统计某区县流入或者流出的另一区县的总人口/countFlowin-tidy.txt");
 
+		// GatherBigCity("D:/人口数据/Task/汇总大城市各区/countFlowin-tidy-countAmounts-sort.txt");
+
+		// countAmount("D:/人口数据/4级数据-统计某区县流入或者流出的另一区县的总人口/countFlowout-tidy.txt");
+		// getSortFlow("D:/人口数据/4级数据-统计某区县流入或者流出的另一区县的总人口/countFlowout-tidy-countAmounts.txt");
+
+		// countTotalAmount("D:/人口数据/5级数据-将每个区县的流动人口数据进行排序/countFlowin-tidy-countAmounts-sort.txt");
+		// getTotalAmountsSort("D:/人口数据/5级数据-将每个区县的流动人口数据进行排序/countFlowin-tidy-countAmounts-sort-countTotalAmounts.txt");
+
+		// getMainIngredients("D:/人口数据/7级数据-利用sort文件提取流动主方向/countFlowin-tidy-countAmounts-sort.txt");
+
+		// getMax("D:/人口数据/8级数据-利用主方向数据提取每个区域流动数目最大值/countFlowout-tidy-countAmounts-sort-MainIngredients.txt");
+
+		// CheckRepeatCode("D:/人口数据/9级数据-利用max数据排查区县的新旧code/countFlowout-tidy-countAmounts-sort-MainIngredients-Max.txt");
+
+		// GatherBigCity("D:/人口数据/10级数据-将大城市的区县进行合并再统计流动数据/countFlowout-tidy-countAmounts-sort.txt");
+
+		//getSortFlow("D:/人口数据/11级数据-对合并的数据进行排序/countFlowin-tidy-countAmounts-sort-gatherBigCity.txt");
+		
+		mergeOtherData("D:/人口数据/12级数据-将合并数据的from或to也合并/countFlowin-tidy-countAmounts-sort-gatherBigCity-sort.txt");
 		System.out.println("ok!");
+
 	}
+
+	/**
+	 * 将合并数据的另一个没有合并成大城市的from或者to合并，并且统计
+	 * 
+	 * @param folder
+	 */
+	public static void mergeOtherData(String folder) {
+		int i = 0;
+	try{
+		String poi = "";
+		Map<String, Integer> map = new HashMap<String, Integer>();
+		Vector<String> file = FileTool.Load(folder, "utf-8");
+		for (; i < file.size(); i++) {
+			poi = file.elementAt(i);
+			String from = Tool.getStrByKey(poi, "<from>", "</from>", "</from>");
+			String to = Tool.getStrByKey(poi, "<to>", "</to>", "</to>");
+			int amount = Integer.parseInt(Tool.getStrByKey(poi, "<amounts>", "</amounts>", "</amounts>"));
+			String subfrom = from.substring(0, 4);
+			
+			if (i == 0) {
+				FileTool.Dump(poi, folder.replace(".txt", "") + "-doubleMerge.txt", "utf-8");
+			} else {
+				String probe=Tool.getStrByKey(file.elementAt(i-1), "<to>", "</to>", "</to>");
+				if(to.equals(probe)){
+					if ((subfrom.equals(to) )&& (to.length() == 4)){
+						int count = 0;
+						if (count == 0) {
+							map.put(subfrom, amount);
+							count++;
+						} else {
+							int before = map.get(subfrom);
+							map.put(subfrom, amount + before);
+						}
+
+					}else{
+						FileTool.Dump(poi, folder.replace(".txt", "") + "-doubleMerge.txt", "utf-8");
+					}
+				}else{
+					if(map.size()!=0){
+						for (Map.Entry<String, Integer> entry : map.entrySet()) {
+							String key = entry.getKey().toString();
+							int value = entry.getValue();
+
+							// from和to
+							String str = "<from>" +key+ "</from>" + "<to>" +probe+ "</to>" + "<amounts>"
+									+ value + "</amounts>";
+							System.out.println(str);
+							FileTool.Dump(str, folder.replace(".txt", "") + "-doubleMerge.txt", "utf-8");
+						}
+						map.clear();
+					}
+					FileTool.Dump(poi, folder.replace(".txt", "") + "-doubleMerge.txt", "utf-8");
+				}
+				
+
+			}
+
+		}
+	}catch(StringIndexOutOfBoundsException e){
+		System.out.println(e.getMessage());
+		System.out.println(i);
+	}
+
+	}
+
+	/**
+	 * 对countFlowin-tidy-countAmounts-sort-countTotalAmounts.txt文件进行排序
+	 * 
+	 * @param folder
+	 */
+	public static void getTotalAmountsSort(String folder) {
+		Vector<String> file = FileTool.Load(folder, "utf-8");
+		String[] arry_index = new String[3161];
+		int[] arry_amounts = new int[3161];
+		for (int i = 0; i < file.size(); i++) {
+			String poi = file.elementAt(i);
+			String index = Tool.getStrByKey(poi, "<to>", "</to>", "</to>");// from和to
+			String amounts = Tool.getStrByKey(poi, "<amounts>", "</amounts>", "</amounts>");
+			arry_index[i] = index;
+			arry_amounts[i] = Integer.parseInt(amounts);
+
+		}
+		Tool.InsertSortArray(arry_index.length, arry_amounts, arry_index);
+
+		for (int i = 0; i < arry_index.length; i++) {
+			String poi = "<to>" + arry_index[i] + "</to>" + "<amounts>" + arry_amounts[i] + "</amounts>";// from和to
+			System.out.println(poi);
+			FileTool.Dump(poi, folder.replace(".txt", "") + "-sort.txt", "utf-8");
+		}
+	}
+
 	/**
 	 * 比较两个文件中的记录是否相同，并且将相同的记录写下来，从而找出两个文件是否存在不相同的记录
+	 * 
 	 * @param folder1
 	 * @param folder2
 	 */
-		public static void CompareAmouts(String folder1, String folder2) {
-			Map<String, Integer> map1 = new HashMap<String, Integer>();
-			Map<String, Integer> map2 = new HashMap<String, Integer>();
-			String poi1 = "";
-			String poi2 = "";
-			Vector<String> Pois1 = FileTool.Load(folder1, "utf-8");
-			for (int a1 = 0; a1 < Pois1.size(); a1++) {
-				poi1 = Pois1.elementAt(a1);
-				String[] arr1 = poi1.split(":");
-				map1.put(arr1[0], Integer.parseInt(arr1[1]));
+	public static void CompareAmouts(String folder1, String folder2) {
+		Map<String, Integer> map1 = new HashMap<String, Integer>();
+		Map<String, Integer> map2 = new HashMap<String, Integer>();
+		String poi1 = "";
+		String poi2 = "";
+		Vector<String> Pois1 = FileTool.Load(folder1, "utf-8");
+		for (int a1 = 0; a1 < Pois1.size(); a1++) {
+			poi1 = Pois1.elementAt(a1);
+			String[] arr1 = poi1.split(":");
+			map1.put(arr1[0], Integer.parseInt(arr1[1]));
+		}
+		Vector<String> Pois2 = FileTool.Load(folder2, "utf-8");
+		for (int a2 = 0; a2 < Pois2.size(); a2++) {
+			poi2 = Pois2.elementAt(a2);
+			String[] arr2 = poi2.split(":");
+			if (map2.get(arr2[0]) != null) {
+				int s = map2.get(arr2[0]);
+				System.out.println(arr2[0] + ":" + s + arr2[1]);
+				map2.put(arr2[0], Integer.parseInt(s + arr2[1]));
+			} else {
+				map2.put(arr2[0], Integer.parseInt(arr2[1]));
 			}
-			Vector<String> Pois2 = FileTool.Load(folder2, "utf-8");
-			for (int a2 = 0; a2 < Pois2.size(); a2++) {
-				poi2 = Pois2.elementAt(a2);
-				String[] arr2 = poi2.split(":");
-				if(map2.get(arr2[0])!=null){
-					int s=map2.get(arr2[0]);
-					System.out.println(arr2[0]+":"+s+arr2[1]);
-					map2.put(arr2[0], Integer.parseInt(s+arr2[1]));
-				}else{
-					map2.put(arr2[0], Integer.parseInt(arr2[1]));
-				}
-			    map2.put(arr2[0], Integer.parseInt(arr2[1]));
-			}
-				Iterator<String> it1 = map1.keySet().iterator();
-				System.out.println("map1.size()="+map1.size());
-				while (it1.hasNext()) {
+			map2.put(arr2[0], Integer.parseInt(arr2[1]));
+		}
+		Iterator<String> it1 = map1.keySet().iterator();
+		System.out.println("map1.size()=" + map1.size());
+		while (it1.hasNext()) {
 
-					String key1;
-					int value1;
+			String key1;
+			int value1;
 
-					key1 = (String) it1.next();
-					value1 = map1.get(key1);
+			key1 = (String) it1.next();
+			value1 = map1.get(key1);
 
-					//System.out.println("map1-" + key1 + ":" + value1);
-					Iterator<String> it2 = map2.keySet().iterator();
-					System.out.println("map2.size()="+map2.size());
-					while (it2.hasNext()) {
-						String key2;
-						int value2;
-						key2 = (String) it2.next();
-						value2 = map2.get(key2);
-						//System.out.println("map2-" + key2 + ":" + value2);
-						if ((key1.equals(key2)) && (value1 == value2)) {
-							//FileTool.Dump(key1 + ":" + value1, "D:/人口数据/3级数据-统计人口流入流出数据/key1=key2.txt", "utf-8");
-							//FileTool.Dump(key2 + ":" + value2, "D:/人口数据/3级数据-统计人口流入流出数据/key2.txt", "utf-8");
-							it2.remove();
-							break;
-						}else if((key1.equals(key2)) && (value1 != value2)){
-							System.out.println("map1-" + key1 + ":" + value1);
-							System.out.println("map2-" + key2 + ":" + value2);
-							break;
-	                     }
-					}
-	               
-
+			// System.out.println("map1-" + key1 + ":" + value1);
+			Iterator<String> it2 = map2.keySet().iterator();
+			System.out.println("map2.size()=" + map2.size());
+			while (it2.hasNext()) {
+				String key2;
+				int value2;
+				key2 = (String) it2.next();
+				value2 = map2.get(key2);
+				// System.out.println("map2-" + key2 + ":" + value2);
+				if ((key1.equals(key2)) && (value1 == value2)) {
+					// FileTool.Dump(key1 + ":" + value1,
+					// "D:/人口数据/3级数据-统计人口流入流出数据/key1=key2.txt", "utf-8");
+					// FileTool.Dump(key2 + ":" + value2,
+					// "D:/人口数据/3级数据-统计人口流入流出数据/key2.txt", "utf-8");
+					it2.remove();
+					break;
+				} else if ((key1.equals(key2)) && (value1 != value2)) {
+					System.out.println("map1-" + key1 + ":" + value1);
+					System.out.println("map2-" + key2 + ":" + value2);
+					break;
 				}
 			}
+
+		}
+	}
+
 	/**
 	 * 通过检查countFlowout.txt文件中每个区县的poi条数来找出多出的poi
 	 */
-	public static void Check_countFlowout(String folder){
-		String poi="";
+	public static void Check_countFlowout(String folder) {
+		String poi = "";
 		setCounty("D:/zhouxiang/人口数据/宾馆数据/人口统计/CodeResult.txt");
 		Vector<String> Pois = FileTool.Load(folder, "utf-8");
 		for (int a = 0; a < Pois.size(); a++) {
 			poi = Pois.elementAt(a);
 			String from = Tool.getStrByKey(poi, "<from>", "</from>", "</from>");
 			for (int i = 0; i < county.size(); i++) {
-				if(from.equals(county.get(i).code)){
+				if (from.equals(county.get(i).code)) {
 					county.get(i).setPoiamounts(1);
 				}
 			}
 		}
-		int acount=0;
+		int acount = 0;
 		for (int i = 0; i < county.size(); i++) {
 			System.out.println(county.get(i).poiamounts);
-			
-			for(int k=0;k<county.get(i).poiamounts.size();k++){
-				acount+=county.get(i).poiamounts.get(k);	
+
+			for (int k = 0; k < county.get(i).poiamounts.size(); k++) {
+				acount += county.get(i).poiamounts.get(k);
 			}
-			System.out.println(county.get(i).code+":"+acount);
-			FileTool.Dump(county.get(i).code+":"+acount, folder+"", "utf-8");
-			acount=0;
+			System.out.println(county.get(i).code + ":" + acount);
+			FileTool.Dump(county.get(i).code + ":" + acount, folder + "", "utf-8");
+			acount = 0;
 		}
 	}
+
 	/**
 	 * 通过检查-tidy.txt文件中每个区县的poi条数来找出多出的poi
 	 */
-	public static void Check_countFlowout_tidy(String folder){
+	public static void Check_countFlowout_tidy(String folder) {
 		String poi = "";
-		int count=1;
+		int count = 1;
 		Vector<String> Pois = FileTool.Load(folder, "utf-8");
 		for (int a = 0; a < Pois.size(); a++) {
 			poi = Pois.elementAt(a);
 			String from = Tool.getStrByKey(poi, "<from>", "</from>", "</from>");
-			String beforefrom="";
-			if(a>0){
-				beforefrom=Tool.getStrByKey(Pois.elementAt(a-1), "<from>", "</from>", "</from>");
-				if(from.equals(beforefrom)){
+			String beforefrom = "";
+			if (a > 0) {
+				beforefrom = Tool.getStrByKey(Pois.elementAt(a - 1), "<from>", "</from>", "</from>");
+				if (from.equals(beforefrom)) {
 					count++;
-				}else{
-					System.out.println(beforefrom+":"+count);
-					count=0;
+				} else {
+					System.out.println(beforefrom + ":" + count);
+					count = 0;
 				}
 			}
 		}
 	}
-	
+
 	/**
-	 *利用countFlowin-tidy-countAmounts-sort.txt文件和bigcityCode.txt文件，将主要省会城市的code合并起来，重新对数据进行统计
+	 * 利用countFlowin-tidy-countAmounts-sort.txt文件和bigcityCode.txt文件，
+	 * 将主要省会城市的code合并起来，重新对数据进行统计
+	 * 
 	 * @param folder
 	 */
 
@@ -186,97 +299,102 @@ public class PopulationStatistics {
 		Map<String, Integer> map = new HashMap<String, Integer>();
 		try {
 			Vector<String> Pois = FileTool.Load(folder, "utf-8");
-			int tempNum=0;
+			int tempNum = 0;
 			for (int a = 0; a < Pois.size(); a++) {
 				poi = Pois.elementAt(a);
 				String from = Tool.getStrByKey(poi, "<from>", "</from>", "</from>");
 				String to = Tool.getStrByKey(poi, "<to>", "</to>", "</to>");
 				int amount = Integer.parseInt(Tool.getStrByKey(poi, "<amounts>", "</amounts>", "</amounts>"));
-				int tolen=to.length();
-				String subto="";
+				int tolen = to.length();
+				String subto = "";
 				int sub;
-				if((to.indexOf("110100")!=-1)||(to.indexOf("5132")!=-1)){
-					 subto=to.substring(1, tolen-2);
-					 sub=Integer.parseInt(subto);
-				}else{
-					subto=to.substring(0,4);
-					sub=Integer.parseInt(subto);
-				}
-				
-				
-				int citycode ;
+				/*
+				 * if((from.indexOf("110100")!=-1)||(from.indexOf("5132")!=-1)){
+				 * //from和to subto=from.substring(1, tolen-2);
+				 * sub=Integer.parseInt(subto);//from和to }else{
+				 */
+				subto = from.substring(0, 4);
+				sub = Integer.parseInt(subto);// from和to
+				// }
+
+				int citycode;
 				String city = "";
-				Vector<String> CityPois = FileTool.Load("D:/人口数据/Task/汇总大城市各区/bigcityCode.txt", "utf-8");
-				int tag=0;
+				Vector<String> CityPois = FileTool.Load("D:/人口数据/10级数据-将大城市的区县进行合并再统计流动数据/bigcityCode.txt", "utf-8");
+				int tag = 0;
 				int CityPoisindex;
-				for (CityPoisindex=0; CityPoisindex < CityPois.size();) {
-					//判断sub是否已经找到过合适的code，如果找到了则不执行if里面的语句，没找到才执行
-					if(tag==0){
+				for (CityPoisindex = 0; CityPoisindex < CityPois.size();) {
+					// 判断sub是否已经找到过合适的code，如果找到了则不执行if里面的语句，没找到才执行
+					if (tag == 0) {
 						city = CityPois.elementAt(CityPoisindex);
-						citycode = Integer.parseInt(Tool.getStrByKey(city, "<code>", "</code>", "</code>"));				
-						if (sub==citycode) {
-							tag++;   //表示该sub找到了合适的code
+						citycode = Integer.parseInt(Tool.getStrByKey(city, "<code>", "</code>", "</code>"));
+						if (sub == citycode) {
+							tag++; // 表示该sub找到了合适的code
 							// 对每个区域逐个统计
 							int count = 0;
-							for (int b =0; b < a; b++) {
-								String probe = Tool.getStrByKey(Pois.elementAt(b), "<from>", "</from>", "</from>");
-								if (from.equals(probe)){
-									if ((map.get(probe) != null)) {//如果前一组数中有两个code与这一组数的code相同，则会有问题
+							for (int b = 0; b < a; b++) {
+								String probe = Tool.getStrByKey(Pois.elementAt(b), "<to>", "</to>", "</to>");// from和to
+								// from和to
+								if (to.equals(probe)) {
+									if ((map.get(probe) != null)) {// 如果前一组数中有两个code与这一组数的code相同，则会有问题
 										int s = map.get(probe);
 										map.put(probe, s + amount);
-										tempNum++;    //表示该poi被处理
-										break;              //跳出最里层循环
-									}else{
-										map.put(from, amount);
-										break;  
+										tempNum++; // 表示该poi被处理
+										break; // 跳出最里层循环
+									} else {
+										map.put(to, amount);// from和to
+										break;
 									}
-								}else{
+								} else {
 									count++;
 								}
-								
+
 							}
 							if (count == a) {
-								map.put(from, amount);
+								map.put(to, amount);// from和to
 								break;
 							}
 						} else {
 							CityPoisindex++;
-							String before=Tool.getStrByKey(Pois.elementAt(a-1), "<to>", "</to>", "</to>"); //上一次执行的poi
-							int beforelen=before.length();
-							String subbefore="";
-							int subindex=0;
-							if((to.indexOf("110100")!=-1)||(to.indexOf("5132")!=-1)){
-								 subbefore=before.substring(1, beforelen-2);
-								 subindex=Integer.parseInt(subbefore);
-							}else{
-								subbefore=before.substring(0,4);
-								subindex=Integer.parseInt(subbefore);
-							}
-							//判断此次的sub与上次是否相同，如果不同则把上次的map值全都打印出来，然后再清空
-							if(sub!=subindex){
+							// from和to
+							String before = Tool.getStrByKey(Pois.elementAt(a - 1), "<from>", "</from>", "</from>"); // 上一次执行的poi
+							int beforelen = before.length();
+							String subbefore = "";
+							int subindex = 0;
+							// from和to
+							/*
+							 * if((from.indexOf("110100")!=-1)||(from.indexOf(
+							 * "5132")!=-1)){ subbefore=before.substring(1,
+							 * beforelen-2);
+							 * subindex=Integer.parseInt(subbefore); }else{
+							 */
+							subbefore = before.substring(0, 4);
+							subindex = Integer.parseInt(subbefore);
+							// }
+							// 判断此次的sub与上次是否相同，如果不同则把上次的map值全都打印出来，然后再清空
+							if (sub != subindex) {
 								String key = "";
 								for (Map.Entry<String, Integer> entry : map.entrySet()) {
 									key = entry.getKey().toString();
 									int value = entry.getValue();
-									
-									String str="<from>"+key+"</from>"+"<to>"+subindex+"</to>"+"<amounts>"+value+"</amounts>";
+
+									// from和to
+									String str = "<from>" + subindex + "</from>" + "<to>" + key + "</to>" + "<amounts>"
+											+ value + "</amounts>";
 									System.out.println(str);
-									FileTool.Dump(str, folder.replace(".txt", "")+"-gatherBigCity.txt", "utf-8");
+									FileTool.Dump(str, folder.replace(".txt", "") + "-gatherBigCity.txt", "utf-8");
 								}
 								map.clear();
-							   //map.put(from, amount);
-							}						
-							
+								// map.put(from, amount);
+							}
+
 						}
-					}else{
+					} else {
 						break;
 					}
-					
-
 				}
-				if(CityPoisindex==CityPois.size()){
+				if (CityPoisindex == CityPois.size()) {
 					System.out.println(poi);
-					FileTool.Dump(poi, folder.replace(".txt", "")+"-gatherBigCity.txt", "utf-8");
+					FileTool.Dump(poi, folder.replace(".txt", "") + "-gatherBigCity.txt", "utf-8");
 				}
 
 			}
@@ -287,16 +405,18 @@ public class PopulationStatistics {
 		}
 
 	}
+
 	/**
 	 * 利用-Max.txt文件和CodeResult.txt文件排查一个区县的新旧code
 	 * 如果from和to的code不一样，但是他们code对应的name一致，则视这两个code为新旧code
+	 * 
 	 * @param folder
 	 */
 
 	public static void CheckRepeatCode(String folder) {
 		String poi = "";
 		try {
-			setCounty("D:/人口数据/Task/排查重复code/CodeResult.txt");
+			setCounty("D:/zhouxiang/人口数据/宾馆数据/人口统计/CodeResult.txt");
 			Vector<String> Pois = FileTool.Load(folder, "utf-8");
 			for (int a = 0; a < Pois.size(); a++) {
 				poi = Pois.elementAt(a);
@@ -323,7 +443,7 @@ public class PopulationStatistics {
 				}
 				if (fromReg.equals(toReg)) {
 					System.out.println(frompoi + topoi);
-					FileTool.Dump(frompoi + topoi, folder.replace(".txt", "") + "-重复code2.txt", "utf-8");
+					FileTool.Dump(frompoi + topoi, folder.replace(".txt", "") + "-重复code.txt", "utf-8");
 				}
 			}
 
@@ -333,10 +453,12 @@ public class PopulationStatistics {
 		}
 
 	}
-/**
- * 利用-MainIngredients.txt文件提取每个区县流动人口数目最大值的记录
- * @param folder
- */
+
+	/**
+	 * 利用-MainIngredients.txt文件提取每个区县流动人口数目最大值的记录
+	 * 
+	 * @param folder
+	 */
 	public static void getMax(String folder) {
 
 		String poi = "";
@@ -358,11 +480,12 @@ public class PopulationStatistics {
 					FromTo.add(0, poi);
 
 				} else {
-					index = Tool.getStrByKey(Pois.elementAt(a - 1), "<to>", "</to>", "</to>"); // from和to
+					index = Tool.getStrByKey(Pois.elementAt(a - 1), "<from>", "</from>", "</from>"); // from和to
 					int counter = 0;
-					if (to.equals(index)) { //// from和to
-						// 对每个区域逐个统计分析
-						if (to.equals(Tool.getStrByKey(Pois.elementAt(0), "<to>", "</to>", "</to>"))) {// from和to
+					if (from.equals(index)) { // from和to
+
+						// from和to
+						if (from.equals(Tool.getStrByKey(Pois.elementAt(0), "<from>", "</from>", "</from>"))) {// from和to
 							counter++;
 							Amounts.add(counter, amount);
 							FromTo.add(counter, poi);
@@ -407,10 +530,12 @@ public class PopulationStatistics {
 		}
 
 	}
-/**
- * 生成json文件
- * @param Folder
- */
+
+	/**
+	 * 生成json文件
+	 * 
+	 * @param Folder
+	 */
 	public static void ProductJson(String Folder) {
 		JSONObject jsonObj = new JSONObject();// 创建json格式的数据
 
@@ -441,8 +566,10 @@ public class PopulationStatistics {
 		}
 
 	}
+
 	/**
 	 * 提取每个区县的主要流动方向
+	 * 
 	 * @param folder
 	 */
 
@@ -464,15 +591,15 @@ public class PopulationStatistics {
 				String index = "";
 				if (a == 0) {
 
-					Amounts.add(0, amount);
+					Amounts.add(0, amount);// add(int index, Integer element)
 					FromTo.add(0, poi);
 
 				} else {
-					index = Tool.getStrByKey(Pois.elementAt(a - 1), "<from>", "</from>", "</from>"); // from和to
+					index = Tool.getStrByKey(Pois.elementAt(a - 1), "<to>", "</to>", "</to>"); // from和to
 					int counter = 0;
-					if (from.equals(index)) { //// from和to
+					if (to.equals(index)) { // from和to
 						// 对每个区域逐个统计分析
-						if (from.equals(Tool.getStrByKey(Pois.elementAt(0), "<from>", "</from>", "</from>"))) {// from和to
+						if (to.equals(Tool.getStrByKey(Pois.elementAt(0), "<to>", "</to>", "</to>"))) {// from和to
 							counter++;
 							Amounts.add(counter, amount);
 							FromTo.add(counter, poi);
@@ -499,8 +626,8 @@ public class PopulationStatistics {
 								double db = Amounts.get(i);
 								if (db > average) {
 									System.out.println(FromTo.get(i));
-									FileTool.Dump(FromTo.get(i),
-											folder.replace(".txt", "") + "-MainIngredients1111.txt", "utf-8");
+									FileTool.Dump(FromTo.get(i), folder.replace(".txt", "") + "-MainIngredients.txt",
+											"utf-8");
 								}
 							}
 						}
@@ -521,7 +648,7 @@ public class PopulationStatistics {
 							double db = Amounts.get(i);
 							if (db > average) {
 								System.out.println(FromTo.get(i));
-								FileTool.Dump(FromTo.get(i), folder.replace(".txt", "") + "-MainIngredients1111.txt",
+								FileTool.Dump(FromTo.get(i), folder.replace(".txt", "") + "-MainIngredients.txt",
 										"utf-8");
 							}
 						}
@@ -541,9 +668,10 @@ public class PopulationStatistics {
 		}
 
 	}
+
 	/**
-	 * 利用-countAmounts.txt文件，将每个区县的记录按照流动人口数目的大小顺序排列
-	 * 同时删除from和to的code一样的数据
+	 * 利用-countAmounts.txt文件，将每个区县的记录按照流动人口数目的大小顺序排列 同时删除from和to的code一样的数据
+	 * 
 	 * @param folder
 	 */
 
@@ -581,7 +709,6 @@ public class PopulationStatistics {
 							String key = "";
 							for (Map.Entry<String, Integer> entry : map.entrySet()) {
 								key = entry.getKey().toString();
-								// String value = entry.getValue().toString();
 								int value = entry.getValue();
 								Amounts[counts] = value;
 								FromTo[counts] = "<from>" + key + "</from>" + "<to>" + index + "</to>" + "<amounts>" // from和to
@@ -603,7 +730,6 @@ public class PopulationStatistics {
 						String key = "";
 						for (Map.Entry<String, Integer> entry : map.entrySet()) {
 							key = entry.getKey().toString();
-							// String value = entry.getValue().toString();
 							int value = entry.getValue();
 							Amounts[counts] = value;
 							FromTo[counts] = "<from>" + key + "</from>" + "<to>" + index + "</to>" + "<amounts>" + value // from和to
@@ -619,7 +745,7 @@ public class PopulationStatistics {
 
 						map.clear();
 						if (!(from.equals(to))) {
-							map.put(to, amount);
+							map.put(from, amount); // from和to
 						}
 
 					}
@@ -652,17 +778,12 @@ public class PopulationStatistics {
 				int amount = Integer.parseInt(Tool.getStrByKey(poi, "<amounts>", "</amounts>", "</amounts>"));
 				String index = "";
 				if (a == 0) {
-					// if(!(from.equals(to))){
-					map.put(to, amount);
-					// }
-
+					map.put(from, amount);// from和to
 				} else {
-					index = Tool.getStrByKey(Pois.elementAt(a - 1), "<from>", "</from>", "</from>");
-					if (from.equals(index)) {
+					index = Tool.getStrByKey(Pois.elementAt(a - 1), "<to>", "</to>", "</to>");// from和to
+					if (to.equals(index)) {// from和to
 						// 对每个区域逐个统计
-						// if(!(from.equals(to))){
-						map.put(to, amount);
-						// }
+						map.put(from, amount);// from和to
 
 						int s = Pois.size();
 						if ((a + 1) == s) {
@@ -671,7 +792,7 @@ public class PopulationStatistics {
 							String key = "";
 							int Total = 0;
 							for (Map.Entry<String, Integer> entry : map.entrySet()) {
-								
+
 								int value = entry.getValue();
 								totalAmounts[counts] = value;
 								counts++;
@@ -679,7 +800,8 @@ public class PopulationStatistics {
 							for (int i = 0; i < totalAmounts.length; i++) {
 								Total += totalAmounts[i];
 							}
-							String str = "<from>" + index + "</from>" + "<amounts>" + Total + "</amounts>";
+							// from和to
+							String str = "<to>" + index + "</to>" + "<amounts>" + Total + "</amounts>";
 							System.out.println(str);
 							FileTool.Dump(str, folder.replace(".txt", "") + "-countTotalAmounts.txt", "utf-8");
 						}
@@ -690,24 +812,22 @@ public class PopulationStatistics {
 						String key = "";
 						int Total = 0;
 						for (Map.Entry<String, Integer> entry : map.entrySet()) {
-							
+
 							int value = entry.getValue();
 							totalAmounts[counts] = value;
 							counts++;
 
-							
 						}
 						for (int i = 0; i < totalAmounts.length; i++) {
 							Total += totalAmounts[i];
 						}
-						String str = "<from>" + index + "</from>" + "<amounts>" + Total + "</amounts>";
+						// from和to
+						String str = "<to>" + index + "</to>" + "<amounts>" + Total + "</amounts>";
 						System.out.println(str);
 						FileTool.Dump(str, folder.replace(".txt", "") + "-countTotalAmounts.txt", "utf-8");
 
 						map.clear();
-						// if(!(from.equals(to))){
-						map.put(to, amount);
-						// }
+						map.put(from, amount);// from和to
 
 					}
 
@@ -719,10 +839,12 @@ public class PopulationStatistics {
 		}
 
 	}
-/**
- * 统计某个区县流向其他区县的人口总数，将相同的流向叠加起来，使得该区县的所有流向不重复
- * @param folder
- */
+
+	/**
+	 * 统计某个区县流向其他区县的人口总数，将相同的流向叠加起来，使得该区县的所有流向不重复
+	 * 
+	 * @param folder
+	 */
 	public static void countAmount(String folder) {
 		String poi = "";
 		try {
@@ -736,58 +858,60 @@ public class PopulationStatistics {
 				int amount = Integer.parseInt(Tool.getStrByKey(poi, "<amount>", "</amount>", "</amount>"));
 				String index = "";
 				if (a == 0) {
-					map.put(from, amount);  //from和to
+					map.put(to, amount); // from和to
 				} else {
-					index = Tool.getStrByKey(Pois.elementAt(a - 1), "<to>", "</to>", "</to>"); //from和to
-					if (to.equals(index)) {//from和to
+					index = Tool.getStrByKey(Pois.elementAt(a - 1), "<from>", "</from>", "</from>"); // from和to
+					if (from.equals(index)) {// from和to
 						// 对每个区域逐个统计
 						int count = 0;
 						for (int b = 0; b < a; b++) {
-							String probe = Tool.getStrByKey(Pois.elementAt(b), "<from>", "</from>", "</from>");//from和to
-							if (from.equals(probe)) {//from和to
+							String probe = Tool.getStrByKey(Pois.elementAt(b), "<to>", "</to>", "</to");// from和to
+							if (to.equals(probe)) {// from和to
 								if (map.get(probe) != null) {
 									int s = map.get(probe);
 									map.put(probe, s + amount);
 									break;
 								} else {
-									map.put(from, amount);//from和to
-									break; //此处的break必须要加，要不然可能会出现同一个from统计两次的情况
+									map.put(to, amount);// from和to
+									break; // 此处的break必须要加，要不然可能会出现同一个from统计两次的情况
 								}
 							} else {
 								count++;
 							}
 						}
 						if (count == a) {
-							map.put(from, amount);//from和to
+							map.put(to, amount);// from和to
 						}
 						int s = Pois.size();
 						if ((a + 1) == s) {
 							String key = "";
-							String value ="";
+							String value = "";
 							for (Map.Entry<String, Integer> entry : map.entrySet()) {
 								key = entry.getKey().toString();
-							    value = entry.getValue().toString();
+								value = entry.getValue().toString();
 
-							    String str="<from>"+key+"</from>"+"<to>"+index+"</to>"+"<amounts>"+value+"</amounts>";
-								//System.out.println(str);
-								FileTool.Dump(str, folder.replace(".txt","")+"-countAmounts.txt", "utf-8");
+								String str = "<from>" + index + "</from>" + "<to>" + key + "</to>" + "<amounts>" + value
+										+ "</amounts>";
+								// System.out.println(str);
+								FileTool.Dump(str, folder.replace(".txt", "") + "-countAmounts.txt", "utf-8");
 							}
-							
+
 						}
 
 					} else {
-                        String key = "";
-						String value ="";
+						String key = "";
+						String value = "";
 						for (Map.Entry<String, Integer> entry : map.entrySet()) {
 							key = entry.getKey().toString();
-						    value = entry.getValue().toString();
+							value = entry.getValue().toString();
 
-						    String str="<from>"+key+"</from>"+"<to>"+index+"</to>"+"<amounts>"+value+"</amounts>";
-							//System.out.println(str);
-							FileTool.Dump(str, folder.replace(".txt","")+"-countAmounts.txt", "utf-8");
+							String str = "<from>" + index + "</from>" + "<to>" + key + "</to>" + "<amounts>" + value
+									+ "</amounts>";
+							// System.out.println(str);
+							FileTool.Dump(str, folder.replace(".txt", "") + "-countAmounts.txt", "utf-8");
 						}
 						map.clear();
-						map.put(from, amount);//from和to
+						map.put(to, amount);// from和to
 					}
 
 				}
@@ -802,8 +926,10 @@ public class PopulationStatistics {
 	/**
 	 * 按照区县顺序整理从某个区县流动到另外一个区县的记录，这里不包括同一目的地的数量叠加
 	 * 
-	 * @param codefolder 有每个区县code的CodeResult.txt文件
-	 * @param countfoder 需要整理的文件的路径
+	 * @param codefolder
+	 *            有每个区县code的CodeResult.txt文件
+	 * @param countfoder
+	 *            需要整理的文件的路径
 	 */
 	// countTo("D:/zhouxiang/人口数据/宾馆数据/人口统计/CodeResult.txt","D:/人口数据/countFlowout.txt");
 	public static void countTo(String codefolder, String countfoder) {
@@ -814,21 +940,21 @@ public class PopulationStatistics {
 			BufferedReader reader = null;
 			String tempString = null;
 			reader = new BufferedReader(isr);
-			
-			//读取CodeResult.txt中的一条数据：
-			//<Code>110100</Code><CodeAddr>北京市</CodeAddr><CodeCoor>116.3847599;39.90230163</CodeCoor><CodeReg>北京市,null,null,null</CodeReg>
+
+			// 读取CodeResult.txt中的一条数据：
+			// <Code>110100</Code><CodeAddr>北京市</CodeAddr><CodeCoor>116.3847599;39.90230163</CodeCoor><CodeReg>北京市,null,null,null</CodeReg>
 			while ((tempString = reader.readLine()) != null) {
 
-				//读取countFlowout.txt文件中的数据
+				// 读取countFlowout.txt文件中的数据
 				Vector<String> countfile = FileTool.Load(countfoder, "utf-8");
-				//从countFlowout.txt文件中的第一条记录开始判断比较
+				// 从countFlowout.txt文件中的第一条记录开始判断比较
 				for (int i = 0; i < countfile.size(); i++) {
 					String poi = countfile.elementAt(i);
 					Demo demo = new Demo(poi);
 					String code = Tool.getStrByKey(tempString, "<Code>", "</Code>", "</Code>");
-					
-					//如果CodeResult.txt中的code与countFlowout.txt中的from相同，则将countFlowout.txt中的poi写下来
-				    //其实是按照CodeResult.txt中code顺序，将countFlowout.txt中的poi排列，先将code为110101的poi写下，再将code为110102的poi写下来
+
+					// 如果CodeResult.txt中的code与countFlowout.txt中的from相同，则将countFlowout.txt中的poi写下来
+					// 其实是按照CodeResult.txt中code顺序，将countFlowout.txt中的poi排列，先将code为110101的poi写下，再将code为110102的poi写下来
 					if (code.equals(demo.from)) {
 						System.out.println(poi);
 						FileTool.Dump(poi, countfoder.replace(".txt", "") + "-tidy.txt", "utf-8");
@@ -889,7 +1015,8 @@ public class PopulationStatistics {
 						}
 					}
 					if (amounts != 0) {
-						String total = "<from>" + Code + "</from>" + "<to>" + probe + "</to>" + "<amounts>" + amounts+ "</amounts>";
+						String total = "<from>" + Code + "</from>" + "<to>" + probe + "</to>" + "<amounts>" + amounts
+								+ "</amounts>";
 						FileTool.Dump(total, countfile.replace(".txt", "") + "-countAmounts.txt", "utf-8");
 					}
 					System.out.println("完成" + Code + "区域" + probe + "的统计");
@@ -917,8 +1044,7 @@ public class PopulationStatistics {
 	}
 
 	/**
-	 * 查询某个区县的人口情况
-	 * 统计各个区县的流入流出人口的数量情况
+	 * 查询某个区县的人口情况 统计各个区县的流入流出人口的数量情况
 	 * 
 	 * @throws IOException
 	 */
@@ -948,9 +1074,10 @@ public class PopulationStatistics {
 
 						}
 						// System.out.println(county.get(i).getpostCodes());
-						String postCodes = county.get(i).getpostCodes().toString().replace(", ", ",").replace("[", "").replace("]", "").replace(" ", "");
-						
-//统计该区县人口流出外地的情况						
+						String postCodes = county.get(i).getpostCodes().toString().replace(", ", ",").replace("[", "")
+								.replace("]", "").replace(" ", "");
+
+						// 统计该区县人口流出外地的情况
 						countFlowout(postCodes, county.get(i).code, folder1);
 
 						// 查询拥有该地区通讯地址的人口
@@ -961,9 +1088,10 @@ public class PopulationStatistics {
 
 						}
 						// System.out.println(county.get(i).gethomeCodes());
-						String homeCodes = county.get(i).gethomeCodes().toString().replace(", ", ",").replace("[", "").replace("]", "").replace(" ", "");
-						
-//统计外地人口流入该区县的情况
+						String homeCodes = county.get(i).gethomeCodes().toString().replace(", ", ",").replace("[", "")
+								.replace("]", "").replace(" ", "");
+
+						// 统计外地人口流入该区县的情况
 						countFlowin(homeCodes, county.get(i).code, folder1);
 
 					}
@@ -989,8 +1117,8 @@ public class PopulationStatistics {
 	 *            流出去的区县的行政代码集合
 	 * @param code
 	 *            该县的行政代码
-	 * @param folder   
-	 *            统计后的数据存放路径  
+	 * @param folder
+	 *            统计后的数据存放路径
 	 */
 	public static void countFlowout(String line, String code, String folder) {
 		if (line.indexOf(",") != -1) {
@@ -1023,8 +1151,8 @@ public class PopulationStatistics {
 	 *            流入该县的人口来源地的行政区划代码集合
 	 * @param code
 	 *            该区县的行政代码
-	 * @param folder   
-	 *            统计后的数据存放路径      
+	 * @param folder
+	 *            统计后的数据存放路径
 	 */
 	public static void countFlowin(String line, String code, String folder) {
 		if (line.indexOf(",") != -1) {
@@ -1040,7 +1168,8 @@ public class PopulationStatistics {
 			for (Entry<String, Integer> entry : map.entrySet()) {
 				if (entry.getValue() > 0) {
 					// System.out.println("字符串："+entry.getKey()+";次数:"+entry.getValue());
-					String str = "<from>" + entry.getKey() + "</from>" + "<to>" + code + "</to>" + "<amount>"+ entry.getValue() + "</amount>";
+					String str = "<from>" + entry.getKey() + "</from>" + "<to>" + code + "</to>" + "<amount>"
+							+ entry.getValue() + "</amount>";
 					// System.out.println(str);
 					FileTool.Dump(str, folder + "countFlowin.txt", "utf-8");
 				}
@@ -1061,10 +1190,13 @@ public class PopulationStatistics {
 		county.add(cp);
 
 	}
-    /**
-     * 设置虚拟的区县盒子，每一个区县相当于一个盒子，每个盒子有code、名称、坐标等基本信息的设置
-     * @param folder 利用CodeResult.txt中的数据来设置不同的区县盒子
-     */
+
+	/**
+	 * 设置虚拟的区县盒子，每一个区县相当于一个盒子，每个盒子有code、名称、坐标等基本信息的设置
+	 * 
+	 * @param folder
+	 *            利用CodeResult.txt中的数据来设置不同的区县盒子
+	 */
 	public static void setCounty(String folder) {
 
 		try {
@@ -1107,13 +1239,13 @@ public class PopulationStatistics {
 	}
 
 	/**
-	 * 分区县统计每个区县的人口记录
-	 * 将人口的户籍地址或者通讯地址的代码分配到各个区县
+	 * 分区县统计每个区县的人口记录 将人口的户籍地址或者通讯地址的代码分配到各个区县
+	 * 
 	 * @param folder
 	 * @throws IOException
 	 */
 	public static void ClassifyStatistic(String folder) throws IOException {
-        //该folder是“D:\人口数据\原始数据”中的数据
+		// 该folder是“D:\人口数据\原始数据”中的数据
 		File file1 = new File(folder);
 
 		FileInputStream fis1 = new FileInputStream(file1);
@@ -1123,27 +1255,27 @@ public class PopulationStatistics {
 
 		reader1 = new BufferedReader(isr1);
 		while ((tempString1 = reader1.readLine()) != null) {
-            //tempString1:<Name>冯喜强</Name><PostCoor>109.536324;22.299784</PostCoor><PostReg>广西壮族自治区,钦州市,浦北县,小江镇</PostReg><Code>452826</Code><CodeAddr>广西壮族自治区钦州地区浦北县</CodeAddr><CodeCoor>109.552798;22.27452501</CodeCoor><CodeReg>广西壮族自治区,钦州市,浦北县,null</CodeReg><CtfTp>ID</CtfTp><CtfId>452826197802134612</CtfId><Home>广西壮族自治区钦州地区浦北县</Home><Gender>M</Gender><Birth>19780213</<Birth><PostAddr>广西浦北县小江镇沙江村委会下车塘村20号</PostAddr><Mobile>no</Mobile><Nation>汉</Nation><Version>2011-12-166:41:57</Version>
+			// tempString1:<Name>冯喜强</Name><PostCoor>109.536324;22.299784</PostCoor><PostReg>广西壮族自治区,钦州市,浦北县,小江镇</PostReg><Code>452826</Code><CodeAddr>广西壮族自治区钦州地区浦北县</CodeAddr><CodeCoor>109.552798;22.27452501</CodeCoor><CodeReg>广西壮族自治区,钦州市,浦北县,null</CodeReg><CtfTp>ID</CtfTp><CtfId>452826197802134612</CtfId><Home>广西壮族自治区钦州地区浦北县</Home><Gender>M</Gender><Birth>19780213</<Birth><PostAddr>广西浦北县小江镇沙江村委会下车塘村20号</PostAddr><Mobile>no</Mobile><Nation>汉</Nation><Version>2011-12-166:41:57</Version>
 
-			//获取该tempString1的户籍地code
+			// 获取该tempString1的户籍地code
 			String admincode = Tool.getStrByKey(tempString1, "<Code>", "</Code>", "</Code>");
-			
-			//获取该tempString1的通讯地code
+
+			// 获取该tempString1的通讯地code
 			String postcode = Tool.getStrByKey(tempString1, "<PostCode>", "</PostCode>", "</PostCode>");
-			
+
 			for (int i = 0; i < county.size(); i++) {
 				String Code = county.get(i).code;
-				//在county中找到与户籍地code一样的code，并且把该tempString1及其包含的通讯地址放到county中对应的那个code的盒子中
-				//该盒子就像虚拟的区县，每个盒子有一个行政区划代码code，该盒子管理着户籍地为该地区的人的记录以及他们的通讯地址code
-				//此外，该盒子还管理着通讯地是该地区的人的记录以及这些的户籍地址code
+				// 在county中找到与户籍地code一样的code，并且把该tempString1及其包含的通讯地址放到county中对应的那个code的盒子中
+				// 该盒子就像虚拟的区县，每个盒子有一个行政区划代码code，该盒子管理着户籍地为该地区的人的记录以及他们的通讯地址code
+				// 此外，该盒子还管理着通讯地是该地区的人的记录以及这些的户籍地址code
 				if (admincode.equals(Code)) {
 					county.get(i).sethomePois(tempString1);
 					county.get(i).setpostCodes(postcode);
 					break;
 				}
 			}
-			
-			//在county中找到与通讯地code一样的code，并且把该tempString1及其包含的户籍地址放到county中对应的那个code的盒子中
+
+			// 在county中找到与通讯地code一样的code，并且把该tempString1及其包含的户籍地址放到county中对应的那个code的盒子中
 			for (int i = 0; i < county.size(); i++) {
 				String Code = county.get(i).code;
 				if (postcode.equals(Code)) {
