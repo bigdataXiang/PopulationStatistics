@@ -73,10 +73,74 @@ public class PopulationStatistics {
 
 		//getSortFlow("D:/人口数据/11级数据-对合并的数据进行排序/countFlowin-tidy-countAmounts-sort-gatherBigCity.txt");
 		
-		mergeOtherData("D:/人口数据/12级数据-将合并数据的from或to也合并/countFlowin-tidy-countAmounts-sort-gatherBigCity-sort.txt");
+		//mergeOtherData("D:/人口数据/12级数据-将合并数据的from或to也合并/countFlowin-tidy-countAmounts-sort-gatherBigCity-sort.txt");
+		
+		//getMainIngredients("D:/人口数据/13级数据-将合并后的from和to相同的删除并提取主方向/countFlowout-tidy-countAmounts-sort-gatherBigCity-sort-doubleMerge.txt");
+		
+		//Vector<String> increment=FileTool.CompareFile("D:/人口数据/14级数据-解决新旧code的问题/countFlowout-tidy-countAmounts-sort-MainIngredients-Max-重复code.txt", "D:/人口数据/14级数据-解决新旧code的问题/countFlowin-tidy-countAmounts-sort-MainIngredients-Max-重复code.txt");
+		//for(int i=0;i<increment.size();i++){
+		//	System.out.println(increment.elementAt(i));
+		//}
+		
+		distinguishCode("D:/人口数据/14级数据-解决新旧code的问题/2015行政区划代码.txt","D:/人口数据/14级数据-解决新旧code的问题/新旧code.txt");
 		System.out.println("ok!");
 
 	}
+	
+	/**
+	 * 排查出区县的新旧code
+	 * @param standard 用于排查的2014年行政区划代码文件
+	 * @param pendingCode 将要被排查的文件
+	 */
+	public static void distinguishCode(String standard,String pendingCode){
+		Map<String, String> standard_map = new HashMap<String,String>();
+		Map<String, String> pending_map = new HashMap<String,String>();
+		Map<String, String> reg_map=new HashMap<String,String>();
+		Vector<String> standard_code=FileTool.Load(standard, "utf-8");
+		Vector<String> pending_code=FileTool.Load(pendingCode, "utf-8");
+		
+		for(int i=0;i<standard_code.size();i++){
+			String poi=standard_code.elementAt(i);
+			String[] code=poi.split(",");
+			standard_map.put(code[0], code[1]);
+		}
+		
+		for(int i=0;i<pending_code.size();i++){
+			String poi=pending_code.elementAt(i);
+			String from = Tool.getStrByKey(poi, "<from>", "</from>", "</from>");
+			String to = Tool.getStrByKey(poi, "<to>", "</to>", "</to>");
+			String reg=Tool.getStrByKey(poi, "<toReg>", "<toReg>", "<toReg>");
+			pending_map.put(from, to);
+			reg_map.put(to, reg);
+			
+		}
+		
+		for (Map.Entry<String, String> pending_entry : pending_map.entrySet()) {
+			String from=pending_entry.getKey();
+			String to=pending_entry.getValue();
+			for (Map.Entry<String, String> standard_entry : standard_map.entrySet()) {
+				String code=standard_entry.getKey();
+				String name=standard_entry.getValue();
+				String poi="";
+				if(from.equals(code)){
+					poi="<new>"+code+"<new>"+"<old>"+to+"</old>"+"<standardname>"+name+"</standardname>"+"<regname>"+reg_map.get(to)+"</regname>";
+					System.out.println(poi);
+					FileTool.Dump(poi, "D:/人口数据/14级数据-解决新旧code的问题/NewOld_Code.txt", "utf-8");
+					break;
+				}else if(to.equals(code)){
+					poi="<new>"+code+"<new>"+"<old>"+from+"</old>"+"<standardname>"+name+"</standardname>"+"<regname>"+reg_map.get(to)+"</regname>";
+					System.out.println(poi);
+					FileTool.Dump(poi, "D:/人口数据/14级数据-解决新旧code的问题/NewOld_Code.txt", "utf-8");
+					break;
+				}
+				
+			}
+			
+		}
+		
+		
+	}
+	
 
 	/**
 	 * 将合并数据的另一个没有合并成大城市的from或者to合并，并且统计
@@ -89,26 +153,32 @@ public class PopulationStatistics {
 		String poi = "";
 		Map<String, Integer> map = new HashMap<String, Integer>();
 		Vector<String> file = FileTool.Load(folder, "utf-8");
-		for (; i < file.size(); i++) {
+		int count = 0;
+		for (i=0; i < file.size(); i++) {
 			poi = file.elementAt(i);
 			String from = Tool.getStrByKey(poi, "<from>", "</from>", "</from>");
 			String to = Tool.getStrByKey(poi, "<to>", "</to>", "</to>");
 			int amount = Integer.parseInt(Tool.getStrByKey(poi, "<amounts>", "</amounts>", "</amounts>"));
-			String subfrom = from.substring(0, 4);
+			String subfrom ="";
+			String subto="";
+			if(from.length()>=4){
+				subfrom = from.substring(0, 4);//from和to
+			}
+			
 			
 			if (i == 0) {
 				FileTool.Dump(poi, folder.replace(".txt", "") + "-doubleMerge.txt", "utf-8");
 			} else {
-				String probe=Tool.getStrByKey(file.elementAt(i-1), "<to>", "</to>", "</to>");
-				if(to.equals(probe)){
-					if ((subfrom.equals(to) )&& (to.length() == 4)){
-						int count = 0;
+				String probe=Tool.getStrByKey(file.elementAt(i-1), "<to>", "</to>", "</to>");//from和to
+				if(to.equals(probe)){//from和to
+					if ((subfrom.equals(to) )&& (to.length() == 4)){//from和to
+						
 						if (count == 0) {
-							map.put(subfrom, amount);
+							map.put(subfrom, amount);//from和to
 							count++;
-						} else {
-							int before = map.get(subfrom);
-							map.put(subfrom, amount + before);
+						}else{
+							int before = map.get(subfrom);//from和to
+							map.put(subfrom, amount + before);//from和to
 						}
 
 					}else{
@@ -127,6 +197,7 @@ public class PopulationStatistics {
 							FileTool.Dump(str, folder.replace(".txt", "") + "-doubleMerge.txt", "utf-8");
 						}
 						map.clear();
+						count = 0;
 					}
 					FileTool.Dump(poi, folder.replace(".txt", "") + "-doubleMerge.txt", "utf-8");
 				}
@@ -590,26 +661,29 @@ public class PopulationStatistics {
 
 				String index = "";
 				if (a == 0) {
-
-					Amounts.add(0, amount);// add(int index, Integer element)
-					FromTo.add(0, poi);
-
+                    if(!(from.equals(to))){
+                    	Amounts.add(0, amount);// add(int index, Integer element)
+    					FromTo.add(0, poi);
+                    }					
 				} else {
-					index = Tool.getStrByKey(Pois.elementAt(a - 1), "<to>", "</to>", "</to>"); // from和to
+					index = Tool.getStrByKey(Pois.elementAt(a - 1), "<from>", "</from>", "</from>"); // from和to
 					int counter = 0;
-					if (to.equals(index)) { // from和to
+					if (from.equals(index)) { // from和to
 						// 对每个区域逐个统计分析
-						if (to.equals(Tool.getStrByKey(Pois.elementAt(0), "<to>", "</to>", "</to>"))) {// from和to
-							counter++;
-							Amounts.add(counter, amount);
-							FromTo.add(counter, poi);
+						if (from.equals(Tool.getStrByKey(Pois.elementAt(0), "<from>", "</from>", "</from>"))) {// from和to
+							if(!(from.equals(to))){
+								counter++;
+								Amounts.add(counter, amount);
+								FromTo.add(counter, poi);
+							}
+							
 						} else {
-
-							Amounts.add(counter, amount);
-							FromTo.add(counter, poi);
-							counter++;
+							if(!(from.equals(to))){
+								Amounts.add(counter, amount);
+								FromTo.add(counter, poi);
+								counter++;
+							}                           
 						}
-
 						int s = Pois.size();
 						if ((a + 1) == s) {
 							int num = Amounts.size();
