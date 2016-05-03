@@ -150,14 +150,35 @@ public class PopulationStatistics {
 		//pageRankData("D:/人口数据/0414重新处理/12级别数据-pagerank算法/countFlowout-NewCode-replaced-tidy-countAmounts-sort-MainIngredients-countTotalAmounts.txt",
 		//		  "D:/人口数据/0414重新处理/12级别数据-pagerank算法/countFlowout-NewCode-replaced-tidy-countAmounts-sort-MainIngredients.txt");
 		
-		pageRank("D:/人口数据/0414重新处理/12级别数据-pagerank算法/National-administrative-divisions.txt",
-				"D:/人口数据/0414重新处理/12级别数据-pagerank算法/countFlowout-MainIngredients-countTotalAmounts-pointRate.txt");
+		//pageRank("D:/人口数据/0414重新处理/12级别数据-pagerank算法/National-administrative-divisions.txt",
+		//		"D:/人口数据/0414重新处理/12级别数据-pagerank算法/countFlowout-MainIngredients-countTotalAmounts-pointRate.txt");
 		
 		//setPopurate("D:/人口数据/0414重新处理/12级别数据-pagerank算法/countFlowout-MainIngredients-countTotalAmounts-pointRate.txt");
 	
-		
+		flowRank("D:/人口数据/0414重新处理/12级别数据-pagerank算法/National-administrative-divisions.txt","D:/人口数据/0414重新处理/12级别数据-pagerank算法/pagerank.txt");
 		System.out.println("ok!");
 
+	}
+	public static void getSortRate(String folder){
+		Vector<String> pois=FileTool.Load(folder, "utf-8");
+		for(int i=0;i<pois.size();i++){
+			
+		}
+	}
+	/**
+	 * 
+	 * @param codefile
+	 * @param ratefile
+	 */
+	public static void flowRank(String codefile,String ratefile){
+		Vector<String> codes=FileTool.Load(codefile, "utf-8");
+		Vector<String> rates=FileTool.Load(ratefile, "utf-8");
+		for(int i=0;i<codes.size();i++){
+			String[] code=codes.elementAt(i).split(",");
+			String rate=rates.elementAt(i);
+			String str=code[0]+","+rate;
+			FileTool.Dump(str, "D:/人口数据/0414重新处理/12级别数据-pagerank算法/pagerank-addcode.txt", "utf-8");
+		}
 	}
 	public static  ArrayList<CountyPopuRate> popurate=new ArrayList<CountyPopuRate>();
 	public static void addCountyPopuRate(CountyPopuRate cpr) {
@@ -261,8 +282,8 @@ public class PopulationStatistics {
 				}
 				
 			}
-			//System.out.println(from+"-ok:"+ok);
-			//System.out.println(from+"-fail:"+fail);
+			System.out.println(from+"-ok:"+ok);
+			System.out.println(from+"-fail:"+fail);
 	 }
 		
 		//数组值arr[x][y]表示指定的是第x行第y列的值。
@@ -321,11 +342,11 @@ public class PopulationStatistics {
 			result[i]=temp;
 			temp=0;
 		}
-		/*
+		
 		for(int i=0;i<result.length;i++){
 			System.out.println(result[i]);
 		}
-		*/
+		
 		return result;
 	}
 	
