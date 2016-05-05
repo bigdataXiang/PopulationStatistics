@@ -41,6 +41,7 @@ import com.svail.gridprocess.Price;
 import com.svail.population_mobility.CountyPopulation;
 import com.svail.test.Demo;
 import com.svail.util.FileTool;
+import com.svail.util.GetKey;
 import com.svail.util.Map_ValueGetKey;
 import com.svail.util.Tool;
 
@@ -160,15 +161,15 @@ public class PopulationStatistics {
 		//pageRankData("D:/人口数据/0414重新处理/12级别数据-pagerank算法/countFlowin-MainIngredients-countTotalAmounts.txt",
 		//		  "D:/人口数据/0414重新处理/12级别数据-pagerank算法/countFlowin-MainIngredients.txt");
 		
-	//	pageRank("D:/人口数据/0414重新处理/12级别数据-pagerank算法/National-administrative-divisions.txt",
-	//			"D:/人口数据/0414重新处理/12级别数据-pagerank算法/countFlowin-MainIngredients-pointRate.txt");
+		pageRank("D:/人口数据/0414重新处理/12级别数据-pagerank算法/National-administrative-divisions.txt",
+				"D:/人口数据/0414重新处理/12级别数据-pagerank算法/countFlowin-MainIngredients-pointRate.txt");
 		
 		//setPopurate("D:/人口数据/0414重新处理/12级别数据-pagerank算法/countFlowout-MainIngredients-countTotalAmounts-pointRate.txt");
 	
 	//	flowRank("D:/人口数据/0414重新处理/12级别数据-pagerank算法/National-administrative-divisions.txt","D:/人口数据/0414重新处理/12级别数据-pagerank算法/pagerank.txt");
 		
 		//getSortRate("D:/人口数据/0414重新处理/12级别数据-pagerank算法/pagerank-addcode.txt");
-		arrayAssignment();
+		//arrayAssignment();
 		System.out.println("ok!");
 
 	}
@@ -264,7 +265,9 @@ public class PopulationStatistics {
 				cpr.setMap(from, rate);
 			}else{
 				String[] before=pois.elementAt(i-1).split(",");
-				index = before[0];
+				//flowout:0
+				//flowin:1
+				index = before[1];
 				
 				//flowout:from
 				//flowin:to
@@ -307,6 +310,7 @@ public class PopulationStatistics {
 		Vector<String> pois = FileTool.Load(folder, "utf-8");
 		Vector<String> flow = FileTool.Load(flowrate, "utf-8");
 		Map<String, Integer> map = new HashMap<String,Integer>();
+		Map<String,CountyPopuRate> codemap=new HashMap<String,CountyPopuRate>();
 		
 		for(int i=0;i<pois.size();i++){
 			String[] poi=pois.elementAt(i).split(",");
@@ -319,23 +323,61 @@ public class PopulationStatistics {
 			//flowin:to
 			map.put(to, i);//标识每个code所在的行列号
 		}
-		setPopurate(flowrate);
 		System.out.println(map.size());
 		double[][] arry=new double[map.size()][map.size()];
 		
+		//将每个区县的code和流入（或者流出）的map存入到popurate中去
+		setPopurate(flowrate);
 		
-		//对矩阵进行赋值
+		//建立一个map，key值为各个区县的code，value为popurate中元素的code值为key类
+		for(int i=0;i<popurate.size();i++){
+			String code=popurate.get(i).code;
+			CountyPopuRate cpr=popurate.get(i);
+			//System.out.println(code+""+cpr.map+"\n");
+			codemap.put(code, cpr);
+		}
+	
+		//首先对矩阵进行初始化，全部赋值为零
+		//一列一列地赋值
+		for(int i=0;i<arry[0].length;i++){
+			for(int j=0;j<arry.length;j++){
+				arry[i][j]=0;
+			}	
+		}
+				
+		
+		//对矩阵中有值的元素进行赋值，其他元素保持为0
 		for(int col=0;col<map.size();col++){
 			Map_ValueGetKey mvg=new Map_ValueGetKey(map);
 			//flowout:from
 			//flowin:to
 			String to=(String) mvg.getKey(col);
 			int ok=0;
-			int fail=0;
-			for(int row=0;row<map.size();row++){
-				//flowout:to
-				//flowin:from
-				String from= mvg.getKey(row);
+			
+			
+			for (Entry<String,CountyPopuRate> entry : codemap.entrySet()) {
+					String key=entry.getKey();
+					CountyPopuRate value=entry.getValue();
+					//flowout:from
+					//flowin:to
+					if(to.equals(key)){
+						for(int row=0;row<map.size();row++){
+							//flowout:to
+							//flowin:from
+							String from= mvg.getKey(row);
+							Object val=value.map.get(from);
+							if(value.map.get(from)!=null){
+								//flowout:to
+								//flowin:from
+								arry[row][col]=value.map.get(from);
+								ok++;
+								//System.out.println("to"+to+"from"+value.map+":"+arry[row][col]);
+							}
+						}	
+					}
+				}
+
+				/*
 				for(int i=0;i<popurate.size();i++){
 					String code=popurate.get(i).code;
 					//flowout:from
@@ -349,24 +391,16 @@ public class PopulationStatistics {
 							arry[row][col]=popurate.get(i).map.get(from);
 						    //System.out.println(to+":"+arry[row][col]);
 						    ok++;
-						}else{
-							arry[row][col]=0;
-							//System.out.println(arry[row][col]);
-							fail++;
-							continue;
 						}
-						
-					}
-					
+					}	
 				}
-				
-			}
+				*/
+
 			//flowout:from
 			//flowin:to
 			System.out.println(to+"-ok:"+ok);
 			//flowout:from
 			//flowin:to
-			System.out.println(to+"-fail:"+fail);
 	 }
 		double[] v=new double[map.size()];
 		for(int i=0;i<v.length;i++){
