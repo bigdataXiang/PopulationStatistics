@@ -160,23 +160,47 @@ public class PopulationStatistics {
 		//pageRankData("D:/人口数据/0414重新处理/12级别数据-pagerank算法/countFlowin-MainIngredients-countTotalAmounts.txt",
 		//		  "D:/人口数据/0414重新处理/12级别数据-pagerank算法/countFlowin-MainIngredients.txt");
 		
-		pageRank("D:/人口数据/0414重新处理/12级别数据-pagerank算法/National-administrative-divisions.txt",
-				"D:/人口数据/0414重新处理/12级别数据-pagerank算法/countFlowin-MainIngredients-pointRate.txt");
+	//	pageRank("D:/人口数据/0414重新处理/12级别数据-pagerank算法/National-administrative-divisions.txt",
+	//			"D:/人口数据/0414重新处理/12级别数据-pagerank算法/countFlowin-MainIngredients-pointRate.txt");
 		
 		//setPopurate("D:/人口数据/0414重新处理/12级别数据-pagerank算法/countFlowout-MainIngredients-countTotalAmounts-pointRate.txt");
 	
-		//flowRank("D:/人口数据/0414重新处理/12级别数据-pagerank算法/National-administrative-divisions.txt","D:/人口数据/0414重新处理/12级别数据-pagerank算法/pagerank.txt");
+	//	flowRank("D:/人口数据/0414重新处理/12级别数据-pagerank算法/National-administrative-divisions.txt","D:/人口数据/0414重新处理/12级别数据-pagerank算法/pagerank.txt");
 		
 		//getSortRate("D:/人口数据/0414重新处理/12级别数据-pagerank算法/pagerank-addcode.txt");
+		arrayAssignment();
 		System.out.println("ok!");
 
 	}
-	static ChartPanel frame3;
-	public  PopulationStatistics(){
+	public static void arrayAssignment(){
+		//数组值arr[x][y]表示指定的是第x行第y列的值。
+		//在使用二维数组对象时，注意length所代表的长度，
+		//数组名后直接加上length(如arr.length)，所指的是有几行(Row)；
+		//指定索引后加上length(如arr[0].length)，指的是该行所拥有的元素，也就是列(Column)数目。
+				
+		double[][] array=new double[3][3];
+
+		//一列一列地赋值
+		for(int i=0;i<array[0].length;i++){
+			for(int j=0;j<array.length;j++){
+				array[i][j]=0;
+			}	
+		}
 		
-      
+		array[0][1]=0.1;
+		array[0][2]=0.2;
+		
+		for(int i=0;i<array[0].length;i++){
+			for(int j=0;j<array.length;j++){
+				System.out.println(array[i][j]);
+			}
+			System.out.println("\n");
+		}
+		
 		
 	}
+
+
 	/**
 	 * 将得到的rankpage结果进行排序
 	 * @param folder
@@ -344,12 +368,6 @@ public class PopulationStatistics {
 			//flowin:to
 			System.out.println(to+"-fail:"+fail);
 	 }
-		
-		//数组值arr[x][y]表示指定的是第x行第y列的值。
-		//在使用二维数组对象时，注意length所代表的长度，
-		//数组名后直接加上length(如arr.length)，所指的是有几行(Row)；
-		//指定索引后加上length(如arr[0].length)，指的是该行所拥有的元素，也就是列(Column)数目。
-		
 		double[] v=new double[map.size()];
 		for(int i=0;i<v.length;i++){
 			double ratio=(double)(1)/(map.size());
