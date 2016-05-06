@@ -141,11 +141,11 @@ public class PopulationStatistics {
 		//replaceOldCode("D:/人口数据/0414重新处理/1级数据-新旧code/countFlowout-tidy-replaceOldCode.txt","D:/人口数据/0414重新处理/1级数据-新旧code/Standard&OldCode.txt");
 		
 		//countAmount("D:/人口数据/0414重新处理/2级数据-将原文件中旧code全部替换/countFlowout-NewCode.txt");
-		//MainCity("D:\\人口数据\\0414重新处理\\3级数据-将大城市的区县cede合并\\主要城区数据.txt");
+		//mainCity("D:\\人口数据\\0414重新处理\\3级数据-将大城市的区县cede合并\\主要城区数据.txt");
 		
-		//replaceCode("D:\\人口数据\\0414重新处理\\3级数据-将大城市的区县cede合并\\主要城区数据-citymaincode.txt","D:\\人口数据\\0414重新处理\\3级数据-将大城市的区县cede合并\\countFlowout-NewCode.txt");
+		//replaceCode("D:/人口数据/0414重新处理/13级数据-将主城区code进行合并/省会-地级市-合并code.txt","D:/人口数据/0414重新处理/13级数据-将主城区code进行合并/countFlowin-NewCode.txt");
 		
-		//countTo("D:/人口数据/0414重新处理/3级数据-将大城市的区县cede合并/14年全国行政区划代码.txt","D:/人口数据/0414重新处理/3级数据-将大城市的区县cede合并/countFlowin-NewCode-replaced.txt");
+		////countTo("D:/人口数据/0414重新处理/3级数据-将大城市的区县cede合并/14年全国行政区划代码.txt","D:/人口数据/0414重新处理/3级数据-将大城市的区县cede合并/countFlowin-NewCode-replaced.txt");
 		
 		//countAmount("D:\\人口数据\\0414重新处理\\5级数据-将排完序的数据进行统计\\countFlowout-NewCode-replaced-tidy.txt");
 		//getSortFlow("D:\\人口数据\\0414重新处理\\6级数据-对统计后的数据进行排序\\countFlowout-NewCode-replaced-tidy-countAmounts.txt");
@@ -161,18 +161,84 @@ public class PopulationStatistics {
 		//pageRankData("D:/人口数据/0414重新处理/12级别数据-pagerank算法/countFlowin-MainIngredients-countTotalAmounts.txt",
 		//		  "D:/人口数据/0414重新处理/12级别数据-pagerank算法/countFlowin-MainIngredients.txt");
 		
-		pageRank("D:/人口数据/0414重新处理/12级别数据-pagerank算法/National-administrative-divisions.txt",
-				"D:/人口数据/0414重新处理/12级别数据-pagerank算法/countFlowin-MainIngredients-pointRate.txt");
+		//pageRank("D:/人口数据/0414重新处理/12级别数据-pagerank算法/National-administrative-divisions.txt",
+	//			"D:/人口数据/0414重新处理/12级别数据-pagerank算法/countFlowin-MainIngredients-pointRate.txt");
 		
 		//setPopurate("D:/人口数据/0414重新处理/12级别数据-pagerank算法/countFlowout-MainIngredients-countTotalAmounts-pointRate.txt");
 	
-	//	flowRank("D:/人口数据/0414重新处理/12级别数据-pagerank算法/National-administrative-divisions.txt","D:/人口数据/0414重新处理/12级别数据-pagerank算法/pagerank.txt");
+		//flowRank("D:/人口数据/0414重新处理/12级别数据-pagerank算法/National-administrative-divisions.txt","D:/人口数据/0414重新处理/12级别数据-pagerank算法/pagerank.txt");
 		
 		//getSortRate("D:/人口数据/0414重新处理/12级别数据-pagerank算法/pagerank-addcode.txt");
 		//arrayAssignment();
+		//addCodeName("D:/人口数据/0414重新处理/12级别数据-pagerank算法/pagerank-addcode-sort.txt","D:/人口数据/0414重新处理/12级别数据-pagerank算法/National-administrative-divisions.txt");
 		System.out.println("ok!");
 
 	}
+	/**
+	 * 将“2014CodeStand.txt”中已经合并了的区县换成合并后的代码
+	 * @param source ： 2014CodeStand.txt
+	 * @param reference ：省会-地级市-合并code.txt
+	 */
+	public static void mergeStandarCode(String source,String reference){
+		Vector<String> Source= FileTool.Load(source, "utf-8");
+		Vector<String> Reference = FileTool.Load(reference, "utf-8");
+		
+		Map<String, String> map = new HashMap<String, String>();
+		for (int k = 0; k < Reference.size(); k++) {
+			String poi = Reference.elementAt(k);
+			String scode= Tool.getStrByKey(poi, "<scode>", "</scode>", "</scode>");
+			String subcode=Tool.getStrByKey(poi, "<subcode>", "</subcode>", "</subcode>");
+			map.put(scode, subcode);
+		}
+		
+		for(int i=0;i<Source.size();i++){
+			String poi=Source.elementAt(i);
+			String scode = Tool.getStrByKey(poi, "<scode>", "</scode>", "</scode>");
+			
+			for (Entry<String, String> entry : map.entrySet()) {
+				String key = entry.getKey().toString();
+				String value = entry.getValue();
+				if(scode.equals(key)){
+					scode=value;
+				}
+			}
+			
+			String str="<code>"+scode+"</code>"+poi.substring(poi.indexOf("</scode>")+"</scode>".length());
+			//System.out.println(str);
+			FileTool.Dump(str, source.replace(".txt", "") + "-replaced.txt", "utf-8");
+			
+			
+		}
+	}
+	/**
+	 * 
+	 * @param data
+	 * @param codefile
+	 */
+	public static void addCodeName(String data,String codefile){
+		Vector<String> Data=FileTool.Load(data, "utf-8");
+		Vector<String> Code=FileTool.Load(codefile, "utf-8");
+		Map<String,String> codemap=new HashMap<String,String>();
+		for(int i=0;i<Code.size();i++){
+			String[] code=Code.elementAt(i).split(",");
+			codemap.put(code[0], code[1]);
+		}
+		for(int i=0;i<Data.size();i++){
+			String[] data1=Data.elementAt(i).split(",");
+			String code=data1[0];
+			String weight=data1[1];
+			if(codemap.get(code)!=null){
+				String str=data1[0]+","+codemap.get(code)+","+data1[1];
+				FileTool.Dump(str, data.replace(".txt", "")+"-addname.txt", "utf-8");
+				
+			}
+			
+		}
+		
+	}
+	/**
+	 * 给矩阵部分元素赋值，其他元素为0
+	 */
 	public static void arrayAssignment(){
 		//数组值arr[x][y]表示指定的是第x行第y列的值。
 		//在使用二维数组对象时，注意length所代表的长度，
