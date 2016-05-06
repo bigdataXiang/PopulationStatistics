@@ -88,15 +88,18 @@ public class PopulationStatistics {
 		// mergeOtherData("D:/人口数据/12级数据-将合并数据的from或to也合并/countFlowin-tidy-countAmounts-sort-gatherBigCity-sort.txt");
 
 		// getMainIngredients("D:/人口数据/13级数据-将合并后的from和to相同的删除并提取主方向/countFlowout-tidy-countAmounts-sort-gatherBigCity-sort-doubleMerge.txt");
-/*    
+/*   
 		Vector<String>
-		increment=FileTool.CompareFile("D:/人口数据/0414重新处理/12级别数据-pagerank算法/countFlowin-MainIngredients.txt",
-				 "D:/人口数据/0414重新处理/12级别数据-pagerank算法/countFlowin-MainIngredients-pointRate.txt");
+		increment=FileTool.CompareFile("D:/人口数据/0414重新处理/13级数据-将主城区code进行合并/problem/countFlowin-NewCode-replaced.txt",
+				 "D:/人口数据/0414重新处理/13级数据-将主城区code进行合并/problem/countFlowin-NewCode-replaced-tidy.txt");
 		 for(int i=0;i<increment.size();i++){
 		 System.out.println(increment.elementAt(i));
+		 FileTool.Dump(increment.elementAt(i),"D:/人口数据/0414重新处理/13级数据-将主城区code进行合并/problem/Flowin-increment.txt", "utf-8");
 		 }
 		 System.out.println("总共有"+increment.size()+"条记录");
-		 */
+		  */ 
+		 
+		
 		
 		
 		 
@@ -145,7 +148,7 @@ public class PopulationStatistics {
 		
 		//replaceCode("D:/人口数据/0414重新处理/13级数据-将主城区code进行合并/省会-地级市-合并code.txt","D:/人口数据/0414重新处理/13级数据-将主城区code进行合并/countFlowin-NewCode.txt");
 		
-		////countTo("D:/人口数据/0414重新处理/3级数据-将大城市的区县cede合并/14年全国行政区划代码.txt","D:/人口数据/0414重新处理/3级数据-将大城市的区县cede合并/countFlowin-NewCode-replaced.txt");
+		countTo("D:/人口数据/0414重新处理/13级数据-将主城区code进行合并/2014CodeStand.txt","D:/人口数据/0414重新处理/13级数据-将主城区code进行合并/countFlowin-NewCode-replaced.txt");
 		
 		//countAmount("D:\\人口数据\\0414重新处理\\5级数据-将排完序的数据进行统计\\countFlowout-NewCode-replaced-tidy.txt");
 		//getSortFlow("D:\\人口数据\\0414重新处理\\6级数据-对统计后的数据进行排序\\countFlowout-NewCode-replaced-tidy-countAmounts.txt");
@@ -171,8 +174,52 @@ public class PopulationStatistics {
 		//getSortRate("D:/人口数据/0414重新处理/12级别数据-pagerank算法/pagerank-addcode.txt");
 		//arrayAssignment();
 		//addCodeName("D:/人口数据/0414重新处理/12级别数据-pagerank算法/pagerank-addcode-sort.txt","D:/人口数据/0414重新处理/12级别数据-pagerank算法/National-administrative-divisions.txt");
+		
+		//delectRedundantCode("D:/人口数据/0414重新处理/13级数据-将主城区code进行合并/2014CodeStand.txt");
 		System.out.println("ok!");
 
+	}
+	/**
+	 * 将合并后多余的code去掉
+	 * @param folder
+	 */
+	public static void delectRedundantCode(String folder){
+		Vector<String> Folder= FileTool.Load(folder, "utf-8");
+		Map<Integer, String> map = new HashMap<Integer, String>();
+		
+		for (int k = 0; k < Folder.size(); k++) {
+			String poi = Folder.elementAt(k);
+			int code=Integer.parseInt(Tool.getStrByKey(poi, "<code>", "</code>", "</code>"));
+			
+			if(k==0){
+				map.put(code, poi);
+			}else{
+				if(map.get(code)==null){
+					map.put(code, poi);
+				}
+			}
+			
+		}
+		
+		int[] code=new int[map.size()];
+		String[] poi=new String[map.size()];
+		int count=0;
+		for (Entry<Integer, String> entry : map.entrySet()) {
+			int key=entry.getKey();
+			String value = entry.getValue();
+			
+			code[count]=key;
+			poi[count]=value;
+			count++;
+		}
+		
+		Tool.InsertSortArray_Ascending(map.size(),code,poi);
+
+		for (int i = 0; i < poi.length; i++) {
+			System.out.println(poi[i]);
+			FileTool.Dump(poi[i], folder.replace(".txt", "") + "-delectRedundantCode.txt", "utf-8");
+		}
+		
 	}
 	/**
 	 * 将“2014CodeStand.txt”中已经合并了的区县换成合并后的代码
@@ -1082,7 +1129,7 @@ public class PopulationStatistics {
 			arry_amounts[i] = Integer.parseInt(amounts);
 
 		}
-		Tool.InsertSortArray(arry_index.length, arry_amounts, arry_index);
+		Tool.InsertSortArray_Descending(arry_index.length, arry_amounts, arry_index);
 
 		for (int i = 0; i < arry_index.length; i++) {
 			String poi = "<to>" + arry_index[i] + "</to>" + "<amounts>" + arry_amounts[i] + "</amounts>";// from和to
@@ -1668,7 +1715,7 @@ public class PopulationStatistics {
 										+ value + "</amounts>";
 								counts++;
 							}
-							Tool.InsertSortArray(Amounts.length, Amounts, FromTo);
+							Tool.InsertSortArray_Descending(Amounts.length, Amounts, FromTo);
 							for (int i = 0; i < FromTo.length; i++) {
 								System.out.println(FromTo[i]);
 								FileTool.Dump(FromTo[i], folder.replace(".txt", "") + "-sort.txt", "utf-8");
@@ -1695,7 +1742,7 @@ public class PopulationStatistics {
 						
 
 						}
-						Tool.InsertSortArray(Amounts.length, Amounts, FromTo);
+						Tool.InsertSortArray_Descending(Amounts.length, Amounts, FromTo);
 						for (int i = 0; i < FromTo.length; i++) {
 							System.out.println(FromTo[i]);
 							FileTool.Dump(FromTo[i], folder.replace(".txt", "") + "-sort.txt", "utf-8");
@@ -1834,6 +1881,8 @@ public class PopulationStatistics {
 			Vector<String> Pois = FileTool.Load(folder, "utf-8");
 			Map<String, Integer> map = new HashMap<String, Integer>();
 			System.out.println("begin:");
+			int start=0;
+			int end=0;
 			for (int a = 0; a < Pois.size(); a++) {
 				poi = Pois.elementAt(a);
 				String from = Tool.getStrByKey(poi, "<from>", "</from>", "</from>");
@@ -1844,6 +1893,7 @@ public class PopulationStatistics {
 					// flowout:to
 					// flowin:from
 					map.put(to, amount);
+					end++;
 				} else {
 					// flowout:from
 					// flowin:to
@@ -1853,31 +1903,35 @@ public class PopulationStatistics {
 					// 与index一致
 					if (from.equals(index)) {
 						int count = 0;
-						for (int b = 0; b < a; b++) {
+						for (int b = start; b < end; b++) {
 							// flowout:to
 							// flowin:from
 							String probe = Tool.getStrByKey(Pois.elementAt(b), "<to>", "</to>", "</to>");
 							// flowout:to
 							// flowin:from
 							if (to.equals(probe)) {
+								//如果map中之前有一个和to一样的code
 								if (map.get(probe) != null) {
 									int s = map.get(probe);
 									map.put(probe, s + amount);
+									end++;
 									break;
 								} else {
 									// flowout:to
 									// flowin:from
 									map.put(to, amount);
+									end++;
 									break; // 此处的break必须要加，要不然可能会出现同一个from统计两次的情况
 								}
 							} else {
 								count++;
 							}
 						}
-						if (count == a) {
+						if (count == (end-start)) {
 							// flowout:to
 							// flowin:from
 							map.put(to, amount);
+							end++;
 						}
 						int s = Pois.size();
 						if ((a + 1) == s) {
@@ -1916,10 +1970,13 @@ public class PopulationStatistics {
 							FileTool.Dump(str, folder.replace(".txt", "") + "-countAmounts.txt", "utf-8");
 						}
 						map.clear();
+						
+						start=end;
 
 						// flowout:to
 						// flowin:from
 						map.put(to, amount);
+						end++;
 					}
 
 				}
@@ -1949,24 +2006,40 @@ public class PopulationStatistics {
 			String tempString = null;
 			reader = new BufferedReader(isr);
 
-			// 读取CodeResult.txt中的一条数据：
-			// <Code>110100</Code><CodeAddr>北京市</CodeAddr><CodeCoor>116.3847599;39.90230163</CodeCoor><CodeReg>北京市,null,null,null</CodeReg>
+			// 读取2014CodeStand.txt中的一条数据：
+			// <code>1101</code><sname>北京市</sname><scoor>116.3847599;39.90230163</scoor><sreg>北京市,null,null,null</sreg>
 			while ((tempString = reader.readLine()) != null) {
-				String[] admin=tempString.split(",");
-				String probe=admin[0];
+				//String[] admin=tempString.split(",");
+				String probe=Tool.getStrByKey(tempString,"<code>", "</code>", "</code>");
 
 				// 读取countFlowout.txt文件中的数据
 				Vector<String> countfile = FileTool.Load(countfoder, "utf-8");
-				// 从countFlowout.txt文件中的第一条记录开始判断比较
+				// 从countFlowout.txt(或者countFlowin.txt)文件中的第一条记录开始判断比较
 				for (int i = 0; i < countfile.size(); i++) {
 					String poi = countfile.elementAt(i);
-					//String from = Tool.getStrByKey(poi, "<from>", "</from>", "</from>");
+					
+					//flowin:to
+					//flowout:from
+					
+					String from = Tool.getStrByKey(poi, "<from>", "</from>", "</from>");
 					String to = Tool.getStrByKey(poi, "<to>", "</to>", "</to>");
+					String amount=Tool.getStrByKey(poi, "<amount>", "</amount>", "</amount>");
 
 					// 如果CodeResult.txt中的code与countFlowout.txt中的from相同，则将countFlowout.txt中的poi写下来
 					// 其实是按照CodeResult.txt中code顺序，将countFlowout.txt中的poi排列，先将code为110101的poi写下，再将code为110102的poi写下来
+					
+					if(from.indexOf("110000")!=-1){
+						from=from.substring(1).replace("110000", "1101");
+					}
+					if(to.indexOf("110000")!=-1){
+						to=to.substring(1).replace("110000", "1101");
+					}
+					
+					//flowin:to
+					//flowout:from
 					if (to.equals(probe)) {
-						System.out.println(poi);
+						FileTool.Dump(poi, countfoder.replace(".txt", "") + "-tidy-替换前.txt", "utf-8");
+						poi="<from>"+from+"</from>"+"<to>"+to+"</to>"+"<amount>"+amount+"</amount>";
 						FileTool.Dump(poi, countfoder.replace(".txt", "") + "-tidy.txt", "utf-8");
 					}
 
