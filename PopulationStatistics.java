@@ -88,16 +88,17 @@ public class PopulationStatistics {
 		// mergeOtherData("D:/人口数据/12级数据-将合并数据的from或to也合并/countFlowin-tidy-countAmounts-sort-gatherBigCity-sort.txt");
 
 		// getMainIngredients("D:/人口数据/13级数据-将合并后的from和to相同的删除并提取主方向/countFlowout-tidy-countAmounts-sort-gatherBigCity-sort-doubleMerge.txt");
-/*   
+/*    
 		Vector<String>
-		increment=FileTool.CompareFile("D:/人口数据/0414重新处理/13级数据-将主城区code进行合并/problem/countFlowin-NewCode-replaced.txt",
-				 "D:/人口数据/0414重新处理/13级数据-将主城区code进行合并/problem/countFlowin-NewCode-replaced-tidy.txt");
+		increment=FileTool.CompareFile("D:/人口数据/0414重新处理/13级数据-将主城区code进行合并/countFlowout-NewCode-replaced.txt",
+				 "D:/人口数据/0414重新处理/13级数据-将主城区code进行合并/countFlowout-NewCode-replaced-tidy-替换前.txt");
 		 for(int i=0;i<increment.size();i++){
 		 System.out.println(increment.elementAt(i));
-		 FileTool.Dump(increment.elementAt(i),"D:/人口数据/0414重新处理/13级数据-将主城区code进行合并/problem/Flowin-increment.txt", "utf-8");
+		 FileTool.Dump(increment.elementAt(i),"D:/人口数据/0414重新处理/13级数据-将主城区code进行合并/countFlowout-increment.txt", "utf-8");
 		 }
 		 System.out.println("总共有"+increment.size()+"条记录");
-		  */ 
+		 */ 
+		 
 		 
 		
 		
@@ -148,32 +149,37 @@ public class PopulationStatistics {
 		
 		//replaceCode("D:/人口数据/0414重新处理/13级数据-将主城区code进行合并/省会-地级市-合并code.txt","D:/人口数据/0414重新处理/13级数据-将主城区code进行合并/countFlowin-NewCode.txt");
 		
-		countTo("D:/人口数据/0414重新处理/13级数据-将主城区code进行合并/2014CodeStand.txt","D:/人口数据/0414重新处理/13级数据-将主城区code进行合并/countFlowin-NewCode-replaced.txt");
+		//countTo("D:/人口数据/0414重新处理/13级数据-将主城区code进行合并/2014CodeStand.txt","D:/人口数据/0414重新处理/13级数据-将主城区code进行合并/countFlowin-NewCode-replaced.txt");
 		
-		//countAmount("D:\\人口数据\\0414重新处理\\5级数据-将排完序的数据进行统计\\countFlowout-NewCode-replaced-tidy.txt");
-		//getSortFlow("D:\\人口数据\\0414重新处理\\6级数据-对统计后的数据进行排序\\countFlowout-NewCode-replaced-tidy-countAmounts.txt");
+		//countAmount("D:/人口数据/0414重新处理/14级数据-将合并后的数据逐个区县地统计/countFlowout-NewCode-replaced-tidy.txt");
+		//getSortFlow("D:/人口数据/0414重新处理/15级数据-对统计后的数据进行排序/countFlowin-NewCode-replaced-tidy-countAmounts.txt");
 		
 		//countTotalAmount("D:\\人口数据\\0414重新处理\\7级数据-统计区县流入或流出人口总数\\countFlowout-NewCode-replaced-tidy-countAmounts-sort.txt");
-		//getMainIngredients("D:\\人口数据\\0414重新处理\\8级数据-利用sort文件提取流动主方向\\countFlowout-NewCode-replaced-tidy-countAmounts-sort.txt");
+		//getMainIngredients("D:/人口数据/0414重新处理/16级数据-利用sort文件提取主方向/countFlowout-NewCode-replaced-tidy-countAmounts-sort.txt");
 		
 		//ProductJson("D:\\人口数据\\0414重新处理\\9级数据-整理数据生成json文件\\replacedCode.txt");
 		
 		//mainCity("D:/人口数据/0414重新处理/11级数据-合并地级市主城区/地级市主城区合并.txt");
-	//	countTotalAmount("D:/人口数据/0414重新处理/12级别数据-pagerank算法/countFlowin-MainIngredients.txt");
+		//countTotalAmount("D:/人口数据/0414重新处理/17级数据-统计主方向文件中区县流动的总人数/countFlowout-NewCode-replaced-tidy-countAmounts-sort-MainIngredients.txt");
 		
-		//pageRankData("D:/人口数据/0414重新处理/12级别数据-pagerank算法/countFlowin-MainIngredients-countTotalAmounts.txt",
-		//		  "D:/人口数据/0414重新处理/12级别数据-pagerank算法/countFlowin-MainIngredients.txt");
 		
-		//pageRank("D:/人口数据/0414重新处理/12级别数据-pagerank算法/National-administrative-divisions.txt",
-	//			"D:/人口数据/0414重新处理/12级别数据-pagerank算法/countFlowin-MainIngredients-pointRate.txt");
+		//pageRankData("D:/人口数据/0414重新处理/17级数据-统计主方向文件中区县流动的总人数/countFlowout-NewCode-replaced-tidy-countAmounts-sort-MainIngredients-countTotalAmounts.txt",
+		//		  "D:/人口数据/0414重新处理/17级数据-统计主方向文件中区县流动的总人数/countFlowout-NewCode-replaced-tidy-countAmounts-sort-MainIngredients.txt");
+		
+		/*
+		pageRank("D:/人口数据/0414重新处理/19级数据-pagerank数据/2014CodeStand.txt",
+				"D:/人口数据/0414重新处理/19级数据-pagerank数据/countFlowin-pointRate.txt");
+				*/
+				
+				
 		
 		//setPopurate("D:/人口数据/0414重新处理/12级别数据-pagerank算法/countFlowout-MainIngredients-countTotalAmounts-pointRate.txt");
 	
-		//flowRank("D:/人口数据/0414重新处理/12级别数据-pagerank算法/National-administrative-divisions.txt","D:/人口数据/0414重新处理/12级别数据-pagerank算法/pagerank.txt");
+		//flowRank("D:/人口数据/0414重新处理/19级数据-pagerank数据/2014CodeStand.txt","D:/人口数据/0414重新处理/19级数据-pagerank数据/countFlowout-pointRate-pagerank-无黄金分割.txt");
 		
-		//getSortRate("D:/人口数据/0414重新处理/12级别数据-pagerank算法/pagerank-addcode.txt");
+		//getSortRate("D:/人口数据/0414重新处理/19级数据-pagerank数据/一倍权重/countFlowout-pointRate-pagerank-无黄金分割-addcode.txt");
 		//arrayAssignment();
-		//addCodeName("D:/人口数据/0414重新处理/12级别数据-pagerank算法/pagerank-addcode-sort.txt","D:/人口数据/0414重新处理/12级别数据-pagerank算法/National-administrative-divisions.txt");
+		addCodeName("D:/人口数据/0414重新处理/19级数据-pagerank数据/一倍权重/countFlowin-pointRate-pagerank-无黄金分割-addcode-sort.txt","D:/人口数据/0414重新处理/19级数据-pagerank数据/2014CodeStand.txt");
 		
 		//delectRedundantCode("D:/人口数据/0414重新处理/13级数据-将主城区code进行合并/2014CodeStand.txt");
 		System.out.println("ok!");
@@ -267,8 +273,11 @@ public class PopulationStatistics {
 		Vector<String> Code=FileTool.Load(codefile, "utf-8");
 		Map<String,String> codemap=new HashMap<String,String>();
 		for(int i=0;i<Code.size();i++){
-			String[] code=Code.elementAt(i).split(",");
-			codemap.put(code[0], code[1]);
+			String poi=Code.elementAt(i);
+			String code=Tool.getStrByKey(poi, "<code>", "</code>", "</code>");
+			String name=Tool.getStrByKey(poi, "<sname>", "</sname>", "</sname>");
+
+			codemap.put(code, name);
 		}
 		for(int i=0;i<Data.size();i++){
 			String[] data1=Data.elementAt(i).split(",");
@@ -331,7 +340,7 @@ public class PopulationStatistics {
 		}
 		Tool.InsertSortArray(code_rate.length, rate, code_rate);
 		for(int i=0;i<code_rate.length;i++){
-			FileTool.Dump(code_rate[i], "D:/人口数据/0414重新处理/12级别数据-pagerank算法/pagerank-addcode-sort.txt", "utf-8");
+			FileTool.Dump(code_rate[i], folder.replace(".txt", "")+"-sort.txt", "utf-8");
 		}
 	}
 	/**
@@ -343,10 +352,10 @@ public class PopulationStatistics {
 		Vector<String> codes=FileTool.Load(codefile, "utf-8");
 		Vector<String> rates=FileTool.Load(ratefile, "utf-8");
 		for(int i=0;i<codes.size();i++){
-			String[] code=codes.elementAt(i).split(",");
+			String code=Tool.getStrByKey(codes.elementAt(i), "<code>", "</code>", "</code>");
 			String rate=rates.elementAt(i);
-			String str=code[0]+","+rate;
-			FileTool.Dump(str, "D:/人口数据/0414重新处理/12级别数据-pagerank算法/pagerank-addcode.txt", "utf-8");
+			String str=code+","+rate;
+			FileTool.Dump(str, ratefile.replace(".txt", "")+"-addcode.txt", "utf-8");
 		}
 	}
 	public static  ArrayList<CountyPopuRate> popurate=new ArrayList<CountyPopuRate>();
@@ -415,9 +424,9 @@ public class PopulationStatistics {
 		
 	}
 	/**
-	 * 
-	 * @param folder
-	 * @param flowrate
+	 * pagerank算法计算每个区县的流动权重
+	 * @param folder ：行政区划标准文件
+	 * @param flowrate ：流动人口数据文件
 	 */
 	public static void pageRank(String folder,String flowrate){
 		Vector<String> pois = FileTool.Load(folder, "utf-8");
@@ -426,11 +435,12 @@ public class PopulationStatistics {
 		Map<String,CountyPopuRate> codemap=new HashMap<String,CountyPopuRate>();
 		
 		for(int i=0;i<pois.size();i++){
-			String[] poi=pois.elementAt(i).split(",");
+			String poi=pois.elementAt(i);
+			String code=Tool.getStrByKey(poi, "<code>", "</code>", "</code>");
 			
 			//flowout:from
 			//flowin:to
-			String to=poi[0];
+			String to=code;
 			
 			//flowout:from
 			//flowin:to
@@ -440,6 +450,9 @@ public class PopulationStatistics {
 		double[][] arry=new double[map.size()][map.size()];
 		
 		//将每个区县的code和流入（或者流出）的map存入到popurate中去
+		
+		//flowout:
+		//flowin:
 		setPopurate(flowrate);
 		
 		//建立一个map，key值为各个区县的code，value为popurate中元素的code值为key类
@@ -478,7 +491,9 @@ public class PopulationStatistics {
 							//flowout:to
 							//flowin:from
 							String from= mvg.getKey(row);
-							Object val=value.map.get(from);
+							                                      //Object val=value.map.get(from);
+							//flowout:to
+							//flowin:from
 							if(value.map.get(from)!=null){
 								//flowout:to
 								//flowin:from
@@ -512,8 +527,7 @@ public class PopulationStatistics {
 			//flowout:from
 			//flowin:to
 			System.out.println(to+"-ok:"+ok);
-			//flowout:from
-			//flowin:to
+			
 	 }
 		double[] v=new double[map.size()];
 		for(int i=0;i<v.length;i++){
@@ -532,7 +546,7 @@ public class PopulationStatistics {
 		 
 		 for(int i=0;i<result.length;i++){
 				System.out.println(result[i]);
-				FileTool.Dump(Double.toString(result[i]), "D:/人口数据/0414重新处理/12级别数据-pagerank算法/pagerank.txt", "utf-8");
+				FileTool.Dump(Double.toString(result[i]), flowrate.replace(".txt", "")+"-pagerank-无黄金分割-10.txt", "utf-8");
 		}	
 		 System.out.println("arry[0].length:"+arry[0].length);
 		 System.out.println("arrylength:"+arry.length);
@@ -557,7 +571,12 @@ public class PopulationStatistics {
 		//double[][] arry={{1,2},{3,4}};
 		for(int i=0;i<arry.length;i++){
 			for(int k=0;k<arry[0].length;k++){
-				temp+=arry[i][k]*v[k];
+
+					//temp+=0.618*arry[i][k]*v[k]+0.328*v[k]; //利用公式V'=αMV+(1-α)e
+					
+					temp+=arry[i][k]*v[k]*10;
+				
+				 
 			}
 			result[i]=temp;
 			temp=0;
@@ -572,8 +591,8 @@ public class PopulationStatistics {
 	
 	/**
 	 * 计算某县流入到该区县的人口占该区县总人口的比例
-	 * @param folder
-	 * @param flowfile
+	 * @param folder :某区县的总人数文件夹
+	 * @param flowfile ：人口流动具体文件夹
 	 */
 	public static void pageRankData(String folder,String flowfile){
 		Vector<String> pois = FileTool.Load(folder, "utf-8");
@@ -587,12 +606,13 @@ public class PopulationStatistics {
 			String poi = pois.elementAt(k);
 			//flowout:from
 			//flowin:to
+			String from= Tool.getStrByKey(poi, "<from>", "</from>", "</from>");
 			String to= Tool.getStrByKey(poi, "<to>", "</to>", "</to>");
 			double  amounts=Double.parseDouble(Tool.getStrByKey(poi, "<amounts>", "</amounts>", "</amounts>"));
 			
 			//flowout:from
 			//flowin:to
-			map.put(to,amounts);
+			map.put(from,amounts);
 		}
 		System.out.println(map.size());
 		
@@ -606,7 +626,7 @@ public class PopulationStatistics {
 				Double value = entry.getValue();
 				//flowout:from
 				//flowin:to
-				if(to.equals(key)){
+				if(from.equals(key)){
 					double rate=(amounts)/(value);
 					String str=from+","+to+","+rate;
 					System.out.println(str);
@@ -1552,46 +1572,51 @@ public class PopulationStatistics {
 	public static void getMainIngredients(String folder) {
 
 		String poi = "";
+		int a=0;
 		try {
 			Vector<String> Pois = FileTool.Load(folder, "utf-8");
-			List<Integer> Amounts = new ArrayList<Integer>();
-			List<String> FromTo = new ArrayList<String>();
+			Map<Integer,Integer> Amounts = new HashMap<Integer,Integer>();
+			Map<Integer,String> FromTo = new HashMap<Integer,String>();
 			System.out.println("begin:");
-			for (int a = 0; a < Pois.size(); a++) {
+			int counter = 0;
+			
+			for (a = 0; a < Pois.size(); a++) {
 				poi = Pois.elementAt(a);
 				String from = Tool.getStrByKey(poi, "<from>", "</from>", "</from>");
 				String to = Tool.getStrByKey(poi, "<to>", "</to>", "</to>");
 				int amount = Integer.parseInt(Tool.getStrByKey(poi, "<amounts>", "</amounts>", "</amounts>"));
+				
 
 				String index = "";
 				if (a == 0) {
 					if (!(from.equals(to))) {
-						Amounts.add(0, amount);// add(int index, Integer
+						Amounts.put(0, amount);// add(int index, Integer
 												// element)
-						FromTo.add(0, poi);
+						FromTo.put(0, poi);
 					}
 				} else {
 					// flowout:from
 					// flowin:to
 					index = Tool.getStrByKey(Pois.elementAt(a - 1), "<from>", "</from>", "</from>");
-					int counter = 0;
+					
 					// flowout:from
 					// flowin:to
 					if (from.equals(index)) { 
 
 						// flowout:from
 						// flowin:to
-						if (to.equals(Tool.getStrByKey(Pois.elementAt(0), "<from>", "</from>", "</from>"))) {
+						if (from.equals(Tool.getStrByKey(Pois.elementAt(0), "<from>", "</from>", "</from>"))) {
 							if (!(from.equals(to))) {
+								
+								Amounts.put(counter, amount);
+								FromTo.put(counter, poi);
 								counter++;
-								Amounts.add(counter, amount);
-								FromTo.add(counter, poi);
 							}
 
 						} else {
 							if (!(from.equals(to))) {
-								Amounts.add(counter, amount);
-								FromTo.add(counter, poi);
+								Amounts.put(counter, amount);
+								FromTo.put(counter, poi);
 								counter++;
 							}
 						}
@@ -1599,11 +1624,11 @@ public class PopulationStatistics {
 						if ((a + 1) == s) {
 							int num = Amounts.size();
 							double average = 0;
-							if (Amounts.size() > 3) {
+							if (Amounts.size() > 5) {
 								int a1 = Amounts.get(1);
 								int b = Amounts.get(2);
 								int c = Amounts.get(3);
-								average = (Amounts.get(1) + Amounts.get(2) + Amounts.get(3)) / 30;
+								average = (Amounts.get(1) + Amounts.get(2) + Amounts.get(3)+Amounts.get(4)) /40;
 							} else {
 								average = Amounts.get(0);
 							}
@@ -1619,13 +1644,14 @@ public class PopulationStatistics {
 
 					} else {
 						int num = Amounts.size();
-						double average;
-						if (Amounts.size() > 3) {
+						//System.out.println(num);
+						double average=0;
+						if (Amounts.size() > 5) {
 							int a1 = Amounts.get(1);
 							int b = Amounts.get(2);
 							int c = Amounts.get(3);
-							average = ((Amounts.get(1) + Amounts.get(2) + Amounts.get(3)) / 30);
-						} else {
+							average = ((Amounts.get(1) + Amounts.get(2) + Amounts.get(3)+Amounts.get(4)) /40);
+						} else if(num!=0) {
 							average = Amounts.get(0);
 						}
 
@@ -1639,9 +1665,15 @@ public class PopulationStatistics {
 						}
 						Amounts.clear();
 						FromTo.clear();
+						
+						counter = 0;
 
-						Amounts.add(0, amount);
-						FromTo.add(0, poi);
+						if (!(from.equals(to))) {
+							Amounts.put(counter, amount);
+							FromTo.put(counter, poi);
+							counter++;
+						}
+						
 
 					}
 
@@ -1649,6 +1681,7 @@ public class PopulationStatistics {
 			}
 		} catch (NullPointerException e) {
 			System.out.println(e.getMessage());
+			System.out.println(a);
 			FileTool.Dump(poi, folder.replace(".txt", "") + "-exception.txt", "utf-8");
 		}
 
@@ -1677,22 +1710,22 @@ public class PopulationStatistics {
 					//if (!(from.equals(to))) {
 						// flowout:to
 						// flowin:from
-						map.put(to, amount);
+						map.put(from, amount);
 					//}
 
 				} else {
 					// flowout:from
 					// flowin:to
-					index = Tool.getStrByKey(Pois.elementAt(a - 1), "<from>", "</from>", "</from>");
+					index = Tool.getStrByKey(Pois.elementAt(a - 1), "<to>", "</to>", "</to>");
 					// flowout:from
 					// flowin:to
-					if (from.equals(index)) {
+					if (to.equals(index)) {
 
 						//if (!(from.equals(to))) {
 							
 							// flowout:to
 							// flowin:from
-							map.put(to, amount);
+							map.put(from, amount);
 
 						//}
 
@@ -1709,9 +1742,8 @@ public class PopulationStatistics {
 
 								// flowout:"<from>" + index + "</from>" + "<to>"
 								// + key + "</to>"
-								// flowin:"<from>" + key + "</from>" + "<to>" +
-								// index + "</to>"
-								FromTo[counts] = "<from>" + index + "</from>" + "<to>" + key + "</to>" + "<amounts>" // from和to
+								// flowin:"<from>" + key + "</from>" + "<to>" +index + "</to>"
+								FromTo[counts] = "<from>" + key + "</from>" + "<to>" +index + "</to>"+ "<amounts>" // from和to
 										+ value + "</amounts>";
 								counts++;
 							}
@@ -1736,7 +1768,7 @@ public class PopulationStatistics {
 							// key + "</to>"
 							// flowin:"<from>" + key + "</from>" + "<to>" +
 							// index + "</to>"
-							FromTo[counts] = "<from>" + index + "</from>" + "<to>" + key + "</to>" + "<amounts>" + value
+							FromTo[counts] ="<from>" + key + "</from>" + "<to>" +index + "</to>"+ "<amounts>" + value
 									+ "</amounts>";
 							counts++;
 						
@@ -1752,7 +1784,7 @@ public class PopulationStatistics {
 						//if (!(from.equals(to))) {
 							// flowout:to
 							// flowin:from
-							map.put(to, amount);
+							map.put(from, amount);
 
 						//}
 
@@ -1789,23 +1821,23 @@ public class PopulationStatistics {
 				if (a == 0) {
 					// flowout:to
 					// flowin:from
-					map.put(from, amount);
+					map.put(to, amount);
 				} else {
 					// flowout:from
 					// flowin:to
-					index = Tool.getStrByKey(Pois.elementAt(a - 1), "<to>", "</to>", "</to>");
+					index = Tool.getStrByKey(Pois.elementAt(a - 1), "<from>", "</from>", "</from>");
 					
 					// flowout:from
 					// flowin:to
 					//与index一致
-					if (to.equals(index)) {
+					if (from.equals(index)) {
 						
 						// 对每个区域逐个统计
 						
 						
 						// flowout:to
 						// flowin:from
-						map.put(from, amount);
+						map.put(to, amount);
 
 						int s = Pois.size();
 						if ((a + 1) == s) {
@@ -1825,7 +1857,7 @@ public class PopulationStatistics {
 							
 							// flowout:"<from>" + index + "</from>"
 							// flowin:"<to>" + index + "</to>"
-							String str = "<to>" + index + "</to>"+ "<amounts>" + Total + "</amounts>";
+							String str ="<from>" + index + "</from>"+ "<amounts>" + Total + "</amounts>";
 							System.out.println(str);
 							FileTool.Dump(str, folder.replace(".txt", "") + "-countTotalAmounts.txt", "utf-8");
 						}
@@ -1848,7 +1880,7 @@ public class PopulationStatistics {
 						
 						// flowout:"<from>" + index + "</from>"
 						// flowin:"<to>" + index + "</to>"
-						String str ="<to>" + index + "</to>"+ "<amounts>" + Total + "</amounts>";
+						String str ="<from>" + index + "</from>"+ "<amounts>" + Total + "</amounts>";
 						System.out.println(str);
 						FileTool.Dump(str, folder.replace(".txt", "") + "-countTotalAmounts.txt", "utf-8");
 
