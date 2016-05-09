@@ -98,14 +98,6 @@ public class PopulationStatistics {
 		 }
 		 System.out.println("总共有"+increment.size()+"条记录");
 		 */ 
-		 
-		 
-		
-		
-		
-		 
-		
-		
 
 		// distinguishCode("D:/人口数据/14级数据-通过排查确定新旧code/2015行政区划代码.txt","D:/人口数据/14级数据-通过排查确定新旧code/新旧code.txt");
 
@@ -160,30 +152,55 @@ public class PopulationStatistics {
 		//ProductJson("D:\\人口数据\\0414重新处理\\9级数据-整理数据生成json文件\\replacedCode.txt");
 		
 		//mainCity("D:/人口数据/0414重新处理/11级数据-合并地级市主城区/地级市主城区合并.txt");
-		//countTotalAmount("D:/人口数据/0414重新处理/17级数据-统计主方向文件中区县流动的总人数/countFlowout-NewCode-replaced-tidy-countAmounts-sort-MainIngredients.txt");
+		//countTotalAmount("D:/人口数据/0414重新处理/21级数据-曲线聚类/2-统计各个区县的流动总人数/countFlowin.txt",0);
 		
 		
-		//pageRankData("D:/人口数据/0414重新处理/17级数据-统计主方向文件中区县流动的总人数/countFlowout-NewCode-replaced-tidy-countAmounts-sort-MainIngredients-countTotalAmounts.txt",
-		//		  "D:/人口数据/0414重新处理/17级数据-统计主方向文件中区县流动的总人数/countFlowout-NewCode-replaced-tidy-countAmounts-sort-MainIngredients.txt");
+		//pageRankData("D:/人口数据/0414重新处理/21级数据-曲线聚类/2-统计各个区县的流动总人数/countFlowin-countTotalAmounts.txt",
+		//		     "D:/人口数据/0414重新处理/21级数据-曲线聚类/2-统计各个区县的流动总人数/countFlowin.txt",0);
 		
-		/*
+		/*	
 		pageRank("D:/人口数据/0414重新处理/19级数据-pagerank数据/2014CodeStand.txt",
 				"D:/人口数据/0414重新处理/19级数据-pagerank数据/countFlowin-pointRate.txt");
-				*/
-				
+			
+		*/		
 				
 		
 		//setPopurate("D:/人口数据/0414重新处理/12级别数据-pagerank算法/countFlowout-MainIngredients-countTotalAmounts-pointRate.txt");
 	
-		//flowRank("D:/人口数据/0414重新处理/19级数据-pagerank数据/2014CodeStand.txt","D:/人口数据/0414重新处理/19级数据-pagerank数据/countFlowout-pointRate-pagerank-无黄金分割.txt");
+		//flowRank("D:/人口数据/0414重新处理/19级数据-pagerank数据/2014CodeStand.txt","D:/人口数据/0414重新处理/19级数据-pagerank数据/countFlowin-pointRate-pagerank-无黄金分割-10.txt");
 		
-		//getSortRate("D:/人口数据/0414重新处理/19级数据-pagerank数据/一倍权重/countFlowout-pointRate-pagerank-无黄金分割-addcode.txt");
+		//getSortRate("D:/人口数据/0414重新处理/19级数据-pagerank数据/countFlowin-pointRate-pagerank-无黄金分割-10-addcode.txt");
 		//arrayAssignment();
-		addCodeName("D:/人口数据/0414重新处理/19级数据-pagerank数据/一倍权重/countFlowin-pointRate-pagerank-无黄金分割-addcode-sort.txt","D:/人口数据/0414重新处理/19级数据-pagerank数据/2014CodeStand.txt");
+		//addCodeName("D:/人口数据/0414重新处理/19级数据-pagerank数据/一倍权重/countFlowin-pointRate-pagerank-无黄金分割-addcode-sort.txt","D:/人口数据/0414重新处理/19级数据-pagerank数据/2014CodeStand.txt");
 		
 		//delectRedundantCode("D:/人口数据/0414重新处理/13级数据-将主城区code进行合并/2014CodeStand.txt");
+		//delectFromToCode("D:/人口数据/0414重新处理/21级数据-曲线聚类/1-去掉from和to为同一code的数据/countFlowout-NewCode-replaced-tidy-countAmounts-sort.txt");
 		System.out.println("ok!");
 
+	}
+	public static void createCurveData(String folder){
+		Vector<String> Folder= FileTool.Load(folder, "utf-8");
+		
+	}
+	/**
+	 * 将from和to的code相同的数据去掉
+	 * @param folder
+	 */
+	public static void delectFromToCode(String folder){
+		Vector<String> Folder= FileTool.Load(folder, "utf-8");
+		int count=0;
+		for (int k = 0; k < Folder.size(); k++) {
+			String poi = Folder.elementAt(k);
+			String from=Tool.getStrByKey(poi, "<from>", "</from>", "</from>");
+			String to=Tool.getStrByKey(poi, "<to>", "</to>", "</to>");
+			if((from.equals(to))){
+				count++;
+			}else{
+				FileTool.Dump(poi, folder.replace(".txt", "") + "-delectfromto.txt", "utf-8");
+			}
+		}
+		System.out.println(count);
+		
 	}
 	/**
 	 * 将合并后多余的code去掉
@@ -589,12 +606,14 @@ public class PopulationStatistics {
 		return result;
 	}
 	
+
 	/**
 	 * 计算某县流入到该区县的人口占该区县总人口的比例
-	 * @param folder :某区县的总人数文件夹
-	 * @param flowfile ：人口流动具体文件夹
+	 * @param folder 某区县的总人数文件
+	 * @param flowfile 人口流动具体文件
+	 * @param n  1为flowout，0为flowin
 	 */
-	public static void pageRankData(String folder,String flowfile){
+	public static void pageRankData(String folder,String flowfile,int n){
 		Vector<String> pois = FileTool.Load(folder, "utf-8");
 		Vector<String> flows = FileTool.Load(flowfile, "utf-8");
 		
@@ -602,39 +621,83 @@ public class PopulationStatistics {
 		
 		System.out.println(flows.size());
 		Map<String, Double> map = new HashMap<String, Double>();
-		for (int k = 0; k < pois.size(); k++) {
-			String poi = pois.elementAt(k);
-			//flowout:from
-			//flowin:to
-			String from= Tool.getStrByKey(poi, "<from>", "</from>", "</from>");
-			String to= Tool.getStrByKey(poi, "<to>", "</to>", "</to>");
-			double  amounts=Double.parseDouble(Tool.getStrByKey(poi, "<amounts>", "</amounts>", "</amounts>"));
-			
-			//flowout:from
-			//flowin:to
-			map.put(from,amounts);
-		}
-		System.out.println(map.size());
 		
-		for(int i=0;i<flows.size();i++){
-			String flow=flows.elementAt(i);
-			String from= Tool.getStrByKey(flow, "<from>", "</from>", "</from>");
-			String to= Tool.getStrByKey(flow, "<to>", "</to>", "</to>");
-			double  amounts=Double.parseDouble(Tool.getStrByKey(flow, "<amounts>", "</amounts>", "</amounts>"));
-			for (Entry<String, Double> entry : map.entrySet()) {
-				String key=entry.getKey();
-				Double value = entry.getValue();
+		boolean flowout;
+		if(n==1){
+			flowout=true;
+		}else{
+			flowout=false;
+		}
+		
+		if(flowout){
+			for (int k = 0; k < pois.size(); k++) {
+				String poi = pois.elementAt(k);
+				
+				String from= Tool.getStrByKey(poi, "<from>", "</from>", "</from>");
+				String to= Tool.getStrByKey(poi, "<to>", "</to>", "</to>");
+				double  amounts=Double.parseDouble(Tool.getStrByKey(poi, "<amounts>", "</amounts>", "</amounts>"));
+				
 				//flowout:from
 				//flowin:to
-				if(from.equals(key)){
-					double rate=(amounts)/(value);
-					String str=from+","+to+","+rate;
-					System.out.println(str);
-					FileTool.Dump(str, flowfile.replace(".txt", "") + "-pointRate.txt", "utf-8");
-				}				
+				map.put(from,amounts);
+			}
+			System.out.println(map.size());
+			
+			for(int i=0;i<flows.size();i++){
+				String flow=flows.elementAt(i);
+				String from= Tool.getStrByKey(flow, "<from>", "</from>", "</from>");
+				String to= Tool.getStrByKey(flow, "<to>", "</to>", "</to>");
+				double  amounts=Double.parseDouble(Tool.getStrByKey(flow, "<amounts>", "</amounts>", "</amounts>"));
+				for (Entry<String, Double> entry : map.entrySet()) {
+					String key=entry.getKey();
+					Double value = entry.getValue();
+					//flowout:from
+					//flowin:to
+					if(from.equals(key)){
+						double rate=(amounts)/(value);
+						String str=from+","+to+","+rate;
+						System.out.println(str);
+						FileTool.Dump(str, flowfile.replace(".txt", "") + "-pointRate.txt", "utf-8");
+					}				
+				}
+				
+			}
+		}else{
+			for (int k = 0; k < pois.size(); k++) {
+				String poi = pois.elementAt(k);
+
+				String from= Tool.getStrByKey(poi, "<from>", "</from>", "</from>");
+				String to= Tool.getStrByKey(poi, "<to>", "</to>", "</to>");
+				double  amounts=Double.parseDouble(Tool.getStrByKey(poi, "<amounts>", "</amounts>", "</amounts>"));
+				
+				//flowout:from
+				//flowin:to
+				map.put(to,amounts);
+			}
+			System.out.println(map.size());
+			
+			for(int i=0;i<flows.size();i++){
+				String flow=flows.elementAt(i);
+				String from= Tool.getStrByKey(flow, "<from>", "</from>", "</from>");
+				String to= Tool.getStrByKey(flow, "<to>", "</to>", "</to>");
+				double  amounts=Double.parseDouble(Tool.getStrByKey(flow, "<amounts>", "</amounts>", "</amounts>"));
+				for (Entry<String, Double> entry : map.entrySet()) {
+					String key=entry.getKey();
+					Double value = entry.getValue();
+					//flowout:from
+					//flowin:to
+					if(to.equals(key)){
+						double rate=(amounts)/(value);
+						String str=from+","+to+","+rate;
+						System.out.println(str);
+						FileTool.Dump(str, flowfile.replace(".txt", "") + "-pointRate.txt", "utf-8");
+					}				
+				}
+				
 			}
 			
 		}
+		
 	}
 	/**
 	 * 将文件中的大城市的主要区县的code替换成简要的code
@@ -1799,48 +1862,79 @@ public class PopulationStatistics {
 
 	}
 
+
+	//countTotalAmount("D:/人口数据/0414重新处理/12级别数据-pagerank算法/countFlowout-NewCode-replaced-tidy-countAmounts-sort-MainIngredients.txt");
 	/**
 	 * 统计最终一个区县的人流动到另外一个区县去的总人数
-	 * 
-	 * @param folder
+	 * @param folder 需要统计的文件
+	 * @param n n为1表示flowout，n为0表示flowin
 	 */
-	//countTotalAmount("D:/人口数据/0414重新处理/12级别数据-pagerank算法/countFlowout-NewCode-replaced-tidy-countAmounts-sort-MainIngredients.txt");
-	public static void countTotalAmount(String folder) {
+	public static void countTotalAmount(String folder,int n) {
 
 		String poi = "";
-		try {
-			Vector<String> Pois = FileTool.Load(folder, "utf-8");
-			Map<String, Integer> map = new HashMap<String, Integer>();
-			System.out.println("begin:");
-			for (int a = 0; a < Pois.size(); a++) {
-				poi = Pois.elementAt(a);
-				String from = Tool.getStrByKey(poi, "<from>", "</from>", "</from>");
-				String to = Tool.getStrByKey(poi, "<to>", "</to>", "</to>");
-				int amount = Integer.parseInt(Tool.getStrByKey(poi, "<amounts>", "</amounts>", "</amounts>"));
-				String index = "";
-				if (a == 0) {
-					// flowout:to
-					// flowin:from
-					map.put(to, amount);
-				} else {
-					// flowout:from
-					// flowin:to
-					index = Tool.getStrByKey(Pois.elementAt(a - 1), "<from>", "</from>", "</from>");
-					
-					// flowout:from
-					// flowin:to
-					//与index一致
-					if (from.equals(index)) {
-						
-						// 对每个区域逐个统计
-						
-						
+		boolean flowout;
+		if(n==1){
+			flowout=true;
+		}else{
+			flowout=false;
+		}
+		
+		if(flowout){
+			try {
+				Vector<String> Pois = FileTool.Load(folder, "utf-8");
+				Map<String, Integer> map = new HashMap<String, Integer>();
+				System.out.println("begin:");
+				for (int a = 0; a < Pois.size(); a++) {
+					poi = Pois.elementAt(a);
+					String from = Tool.getStrByKey(poi, "<from>", "</from>", "</from>");
+					String to = Tool.getStrByKey(poi, "<to>", "</to>", "</to>");
+					int amount = Integer.parseInt(Tool.getStrByKey(poi, "<amounts>", "</amounts>", "</amounts>"));
+					String index = "";
+					if (a == 0) {
 						// flowout:to
 						// flowin:from
 						map.put(to, amount);
+					} else {
+						// flowout:from
+						// flowin:to
+						index = Tool.getStrByKey(Pois.elementAt(a - 1), "<from>", "</from>", "</from>");
+						
+						// flowout:from
+						// flowin:to
+						//与index一致
+						if (from.equals(index)) {
+							
+							// 对每个区域逐个统计
+							
+							
+							// flowout:to
+							// flowin:from
+							map.put(to, amount);
 
-						int s = Pois.size();
-						if ((a + 1) == s) {
+							int s = Pois.size();
+							if ((a + 1) == s) {
+								int[] totalAmounts = new int[map.size()];
+								int counts = 0;
+								String key = "";
+								int Total = 0;
+								for (Map.Entry<String, Integer> entry : map.entrySet()) {
+
+									int value = entry.getValue();
+									totalAmounts[counts] = value;
+									counts++;
+								}
+								for (int i = 0; i < totalAmounts.length; i++) {
+									Total += totalAmounts[i];
+								}
+								
+								// flowout:"<from>" + index + "</from>"
+								// flowin:"<to>" + index + "</to>"
+								String str ="<from>" + index + "</from>"+ "<amounts>" + Total + "</amounts>";
+								System.out.println(str);
+								FileTool.Dump(str, folder.replace(".txt", "") + "-countTotalAmounts.txt", "utf-8");
+							}
+
+						} else {
 							int[] totalAmounts = new int[map.size()];
 							int counts = 0;
 							String key = "";
@@ -1850,6 +1944,7 @@ public class PopulationStatistics {
 								int value = entry.getValue();
 								totalAmounts[counts] = value;
 								counts++;
+
 							}
 							for (int i = 0; i < totalAmounts.length; i++) {
 								Total += totalAmounts[i];
@@ -1860,44 +1955,114 @@ public class PopulationStatistics {
 							String str ="<from>" + index + "</from>"+ "<amounts>" + Total + "</amounts>";
 							System.out.println(str);
 							FileTool.Dump(str, folder.replace(".txt", "") + "-countTotalAmounts.txt", "utf-8");
-						}
 
-					} else {
-						int[] totalAmounts = new int[map.size()];
-						int counts = 0;
-						String key = "";
-						int Total = 0;
-						for (Map.Entry<String, Integer> entry : map.entrySet()) {
-
-							int value = entry.getValue();
-							totalAmounts[counts] = value;
-							counts++;
+							map.clear();
+							
+							// flowout:to
+							// flowin:from
+							map.put(from, amount);
 
 						}
-						for (int i = 0; i < totalAmounts.length; i++) {
-							Total += totalAmounts[i];
-						}
-						
-						// flowout:"<from>" + index + "</from>"
-						// flowin:"<to>" + index + "</to>"
-						String str ="<from>" + index + "</from>"+ "<amounts>" + Total + "</amounts>";
-						System.out.println(str);
-						FileTool.Dump(str, folder.replace(".txt", "") + "-countTotalAmounts.txt", "utf-8");
 
-						map.clear();
-						
+					}
+				}
+			} catch (NullPointerException e) {
+				System.out.println(e.getMessage());
+				FileTool.Dump(poi, folder.replace(".txt", "") + "-exception.txt", "utf-8");
+			}
+		}else{
+			try {
+				Vector<String> Pois = FileTool.Load(folder, "utf-8");
+				Map<String, Integer> map = new HashMap<String, Integer>();
+				System.out.println("begin:");
+				for (int a = 0; a < Pois.size(); a++) {
+					poi = Pois.elementAt(a);
+					String from = Tool.getStrByKey(poi, "<from>", "</from>", "</from>");
+					String to = Tool.getStrByKey(poi, "<to>", "</to>", "</to>");
+					int amount = Integer.parseInt(Tool.getStrByKey(poi, "<amounts>", "</amounts>", "</amounts>"));
+					String index = "";
+					if (a == 0) {
 						// flowout:to
 						// flowin:from
 						map.put(from, amount);
+					} else {
+						// flowout:from
+						// flowin:to
+						index = Tool.getStrByKey(Pois.elementAt(a - 1), "<to>", "</to>", "</to>");
+						
+						// flowout:from
+						// flowin:to
+						//与index一致
+						if (to.equals(index)) {
+							
+							// 对每个区域逐个统计
+							
+							
+							// flowout:to
+							// flowin:from
+							map.put(from, amount);
+
+							int s = Pois.size();
+							if ((a + 1) == s) {
+								int[] totalAmounts = new int[map.size()];
+								int counts = 0;
+								String key = "";
+								int Total = 0;
+								for (Map.Entry<String, Integer> entry : map.entrySet()) {
+
+									int value = entry.getValue();
+									totalAmounts[counts] = value;
+									counts++;
+								}
+								for (int i = 0; i < totalAmounts.length; i++) {
+									Total += totalAmounts[i];
+								}
+								
+								// flowout:"<from>" + index + "</from>"
+								// flowin:"<to>" + index + "</to>"
+								String str ="<to>" + index + "</to>"+ "<amounts>" + Total + "</amounts>";
+								System.out.println(str);
+								FileTool.Dump(str, folder.replace(".txt", "") + "-countTotalAmounts.txt", "utf-8");
+							}
+
+						} else {
+							int[] totalAmounts = new int[map.size()];
+							int counts = 0;
+							String key = "";
+							int Total = 0;
+							for (Map.Entry<String, Integer> entry : map.entrySet()) {
+
+								int value = entry.getValue();
+								totalAmounts[counts] = value;
+								counts++;
+
+							}
+							for (int i = 0; i < totalAmounts.length; i++) {
+								Total += totalAmounts[i];
+							}
+							
+							// flowout:"<from>" + index + "</from>"
+							// flowin:"<to>" + index + "</to>"
+							String str ="<to>" + index + "</to>"+ "<amounts>" + Total + "</amounts>";
+							System.out.println(str);
+							FileTool.Dump(str, folder.replace(".txt", "") + "-countTotalAmounts.txt", "utf-8");
+
+							map.clear();
+							
+							// flowout:to
+							// flowin:from
+							map.put(from, amount);
+
+						}
 
 					}
-
 				}
+			} catch (NullPointerException e) {
+				System.out.println(e.getMessage());
+				FileTool.Dump(poi, folder.replace(".txt", "") + "-exception.txt", "utf-8");
 			}
-		} catch (NullPointerException e) {
-			System.out.println(e.getMessage());
-			FileTool.Dump(poi, folder.replace(".txt", "") + "-exception.txt", "utf-8");
 		}
+		
 
 	}
 
