@@ -175,12 +175,184 @@ public class PopulationStatistics {
 		
 		//delectRedundantCode("D:/人口数据/0414重新处理/13级数据-将主城区code进行合并/2014CodeStand.txt");
 		//delectFromToCode("D:/人口数据/0414重新处理/21级数据-曲线聚类/1-去掉from和to为同一code的数据/countFlowout-NewCode-replaced-tidy-countAmounts-sort.txt");
+		
+		createCurveData("D:/人口数据/0414重新处理/21级数据-曲线聚类/3-计算流动人口比率/countFlowout-pointRate.txt",
+				         "D:/人口数据/0414重新处理/21级数据-曲线聚类/3-计算流动人口比率/2014CodeStand.txt",1);
 		System.out.println("ok!");
 
 	}
-	public static void createCurveData(String folder){
-		Vector<String> Folder= FileTool.Load(folder, "utf-8");
+	public static void createCurveData(String flowfolder,String codefile,int n){
+		Vector<String> Folder= FileTool.Load(flowfolder, "utf-8");
+		Vector<String> CodeFile=FileTool.Load(codefile, "utf-8");
 		
+		double[][] curvedata=new double[2578][2578];
+		
+		for(int i=0;i<curvedata[0].length;i++){
+			for(int j=0;j<curvedata.length;j++){
+				curvedata[i][j]=0;
+			}	
+		}
+		
+		//设置矩阵的每一行为一个code的比率数组
+		Map<Integer, String> map = new HashMap<Integer, String>();
+		for(int i=0;i<CodeFile.size();i++){
+			String code=Tool.getStrByKey(CodeFile.elementAt(i), "<code>", "</code>", "</code>");
+			map.put(i, code);
+		}
+		
+		setPopurate_Descending(flowfolder,n);
+		
+		Map<String,CountyPopuRate> codemap=new HashMap<String,CountyPopuRate>();
+		//建立一个map，key值为各个区县的code，value为popurate中元素的code值为key类
+		for(int i=0;i<popurate.size();i++){
+				String code=popurate.get(i).code;
+				CountyPopuRate cpr=popurate.get(i);
+				//System.out.println(code+""+cpr.map+"\n");
+				codemap.put(code, cpr);
+		}
+		
+		for(int row=0;row<curvedata.length;row++){
+			String code=map.get(row);
+			for (Entry<String,CountyPopuRate> entry :codemap.entrySet()) {
+				String key=entry.getKey();
+				CountyPopuRate value=entry.getValue();
+				
+				if(code.equals(key)){
+					for(int i=0;i<value.map_intkey.size();i++){
+						
+						curvedata[row][i]=value.map_intkey.get(i);
+						//System.out.println(curvedata[row][i]);
+					}
+				}
+			}
+			String arry="";
+			for(int i=0;i<curvedata[row].length;i++){
+				arry+=curvedata[row][i]+",";
+			}
+			System.out.println(code+":"+arry);
+			FileTool.Dump(code+":"+arry, flowfolder.replace(".txt", "") + "-curvedata.txt", "utf-8");
+		}
+    }
+	public static void setPopurate_Descending(String folder,int n){
+
+		Vector<String> pois=FileTool.Load(folder, "utf-8");
+		CountyPopuRate cpr=new CountyPopuRate();
+		
+		boolean flowout;
+		if(n==1){
+			flowout=true;
+		}else{
+			flowout=false;
+		}
+		
+		if(flowout){
+			int count=0;
+			for(int i=0;i<pois.size();i++){
+				String[] poi=pois.elementAt(i).split(",");
+				String from=poi[0];
+				String to=poi[1];
+				double rate=Double.parseDouble(poi[2]);
+				
+				String index ="";
+				
+				if (i == 0) {
+					//flowout:from
+					//flowin:to
+					cpr.setCode(from);
+					
+					//flowout:to
+					//flowin:from
+					cpr.setMap_intkey(count, rate);
+				}else{
+					String[] before=pois.elementAt(i-1).split(",");
+					//flowout:0
+					//flowin:1
+					index = before[0];
+					
+					//flowout:from
+					//flowin:to
+					if(from.equals(index)){
+						//flowout:to
+						//flowin:from
+						count++;
+						cpr.setMap_intkey(count, rate);
+						
+						if(i+1==pois.size()){
+							addCountyPopuRate(cpr);
+						}
+					}else{
+						addCountyPopuRate(cpr);
+						cpr=new CountyPopuRate();
+						//flowout:from
+						//flowin:to
+						cpr.setCode(from);
+						//flowout:to
+						//flowin:from
+						count=0;
+						cpr.setMap_intkey(count, rate);
+
+					}
+				}
+			}	
+		}else{
+			int count=0;
+			for(int i=0;i<pois.size();i++){
+				String[] poi=pois.elementAt(i).split(",");
+				String from=poi[0];
+				String to=poi[1];
+				double rate=Double.parseDouble(poi[2]);
+				
+				String index ="";
+				
+				if (i == 0) {
+					//flowout:from
+					//flowin:to
+					cpr.setCode(to);
+					
+					//flowout:to
+					//flowin:from
+					cpr.setMap_intkey(count, rate);
+				}else{
+					String[] before=pois.elementAt(i-1).split(",");
+					//flowout:0
+					//flowin:1
+					index = before[1];
+					
+					//flowout:from
+					//flowin:to
+					if(to.equals(index)){
+						//flowout:to
+						//flowin:from
+						count++;
+						cpr.setMap_intkey(count, rate);
+						
+						if(i+1==pois.size()){
+							addCountyPopuRate(cpr);
+						}
+						
+					}else{
+						addCountyPopuRate(cpr);
+						cpr=new CountyPopuRate();
+						//flowout:from
+						//flowin:to
+						cpr.setCode(to);
+						//flowout:to
+						//flowin:from
+						count=0;
+						cpr.setMap_intkey(count, rate);
+					}
+				}
+			}
+		}
+		
+		
+		//for (int i = 0; i < popurate.size(); i++) {
+			//System.out.println(popurate.get(i).code+":");
+			//System.out.println("共有"+popurate.get(i).map.size()+"个区县");
+		//	for (Entry<String, Double> entry : popurate.get(1).map.entrySet()) {
+		//		System.out.println(entry.getKey()+":"+entry.getValue());
+		//	}
+        //}		
 	}
 	/**
 	 * 将from和to的code相同的数据去掉
@@ -383,51 +555,111 @@ public class PopulationStatistics {
 	 * 将该区县流入到其他各个区县的比率存入 popurate中
 	 * @param folder
 	 */
-	public static void setPopurate(String folder){
+	public static void setPopurate(String folder,int n){
 		Vector<String> pois=FileTool.Load(folder, "utf-8");
 		CountyPopuRate cpr=new CountyPopuRate();
-		for(int i=0;i<pois.size();i++){
-			String[] poi=pois.elementAt(i).split(",");
-			String from=poi[0];
-			String to=poi[1];
-			double rate=Double.parseDouble(poi[2]);
-			
-			String index ="";
-			
-			if (i == 0) {
-				//flowout:from
-				//flowin:to
-				cpr.setCode(to);
+		
+		boolean flowout;
+		if(n==1){
+			flowout=true;
+		}else{
+			flowout=false;
+		}
+		
+		if(flowout){
+			for(int i=0;i<pois.size();i++){
+				String[] poi=pois.elementAt(i).split(",");
+				String from=poi[0];
+				String to=poi[1];
+				double rate=Double.parseDouble(poi[2]);
 				
-				//flowout:to
-				//flowin:from
-				cpr.setMap(from, rate);
-			}else{
-				String[] before=pois.elementAt(i-1).split(",");
-				//flowout:0
-				//flowin:1
-				index = before[1];
+				String index ="";
 				
-				//flowout:from
-				//flowin:to
-				if(to.equals(index)){
+				if (i == 0) {
+					//flowout:from
+					//flowin:to
+					cpr.setCode(from);
+					
+					//flowout:to
+					//flowin:from
+					cpr.setMap(to, rate);
+				}else{
+					String[] before=pois.elementAt(i-1).split(",");
+					//flowout:0
+					//flowin:1
+					index = before[0];
+					
+					//flowout:from
+					//flowin:to
+					if(from.equals(index)){
+						//flowout:to
+						//flowin:from
+						cpr.setMap(to, rate);
+						
+						if(i+1==pois.size()){
+							addCountyPopuRate(cpr);
+						}
+					}else{
+						addCountyPopuRate(cpr);
+						cpr=new CountyPopuRate();
+						//flowout:from
+						//flowin:to
+						cpr.setCode(from);
+						//flowout:to
+						//flowin:from
+						cpr.setMap(to, rate);
+
+					}
+				}
+			}	
+		}else{
+			for(int i=0;i<pois.size();i++){
+				String[] poi=pois.elementAt(i).split(",");
+				String from=poi[0];
+				String to=poi[1];
+				double rate=Double.parseDouble(poi[2]);
+				
+				String index ="";
+				
+				if (i == 0) {
+					//flowout:from
+					//flowin:to
+					cpr.setCode(to);
+					
 					//flowout:to
 					//flowin:from
 					cpr.setMap(from, rate);
 				}else{
-					addCountyPopuRate(cpr);
-					cpr=new CountyPopuRate();
+					String[] before=pois.elementAt(i-1).split(",");
+					//flowout:0
+					//flowin:1
+					index = before[1];
+					
 					//flowout:from
 					//flowin:to
-					cpr.setCode(to);
-					//flowout:to
-					//flowin:from
-					cpr.setMap(from, rate);
+					if(to.equals(index)){
+						//flowout:to
+						//flowin:from
+						cpr.setMap(from, rate);
+						
+						if(i+1==pois.size()){
+							addCountyPopuRate(cpr);
+						}
+					}else{
+						addCountyPopuRate(cpr);
+						cpr=new CountyPopuRate();
+						//flowout:from
+						//flowin:to
+						cpr.setCode(to);
+						//flowout:to
+						//flowin:from
+						cpr.setMap(from, rate);
 
+					}
 				}
 			}
-			
 		}
+		
 		
 		//for (int i = 0; i < popurate.size(); i++) {
 			//System.out.println(popurate.get(i).code+":");
@@ -470,7 +702,7 @@ public class PopulationStatistics {
 		
 		//flowout:
 		//flowin:
-		setPopurate(flowrate);
+		setPopurate(flowrate,0);
 		
 		//建立一个map，key值为各个区县的code，value为popurate中元素的code值为key类
 		for(int i=0;i<popurate.size();i++){
