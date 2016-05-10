@@ -184,6 +184,18 @@ public class PopulationStatistics {
 		System.out.println("ok!");
 
 	}
+	/**
+	 * 将每类曲线定义成一个CC
+	 */
+	public static ArrayList<CurveClass> curveclass = new ArrayList<CurveClass>();
+
+	/**
+	 * 对每个CC进行数据的填充
+	 */
+	public static void addCurveClass(CurveClass cc) {
+		curveclass.add(cc);
+
+	}
 	public static void curveDistance(String flowfolder,String codefile){
 		Vector<String> Folder= FileTool.Load(flowfolder, "utf-8");
 		Vector<String> CodeFile=FileTool.Load(codefile, "utf-8");
@@ -191,19 +203,32 @@ public class PopulationStatistics {
 		Map<Integer,String> indexmap=new HashMap<Integer,String>();
 		
 		//建立一个map，每个code对应一条曲线数组
+		int invalid=0;
 		for(int i=0;i<Folder.size();i++){
 			String poi=Folder.elementAt(i);
 			String[] temp=poi.split(":");
 			String code=temp[0];
 			String[] ratearray=temp[1].split(",");
-			map.put(code, ratearray);
+			
+			if(ratearray[0].equals("0")||ratearray[0].equals("1.0")){
+				invalid++;
+			}else{
+				map.put(code, ratearray);
+				indexmap.put(i, code); //建立一个indexmap，用来检索map中某个具体的code所在的位置
+			}
+			
 		}
+		System.out.println("无效的点的个数有："+invalid);		
 		
-		//建立一个indexmap，用来检索map中某个具体的code所在的位置
-		for(int i=0;i<CodeFile.size();i++){
-			String code=Tool.getStrByKey(CodeFile.elementAt(i), "<code>", "</code>", "</code>");
-			indexmap.put(i, code);
+		//初始状态下将所有的code放入同一类曲线C中
+		CurveClass cc=new CurveClass();
+		cc.setCategory(0);
+		for(int i=0;i<indexmap.size();i++){
+			String code=indexmap.get(i);
+			cc.setCodes(code);
 		}
+		addCurveClass(cc);
+		
 		
 		//计算曲线类C的相似精度D(C)
 		double[][] DC=new double[indexmap.size()][indexmap.size()];
@@ -211,12 +236,13 @@ public class PopulationStatistics {
 		double[] Threshold=new double[indexmap.size()];
 		String[] Codes=new String[indexmap.size()];
 		for(int i=0;i<indexmap.size();i++){
+			System.out.println("i="+i+":");
 			String codei=indexmap.get(i);
 			String[] arrayi=map.get(codei);
 			
 			double[] distance=new double[arrayi.length];
 			
-			for(int j=0;j<indexmap.size();j++){
+			for(int j=i+1;j<indexmap.size();j++){
 				String codej=indexmap.get(j);
 				String[] arrayj=map.get(codej);
 				int n=arrayi.length;
@@ -224,7 +250,7 @@ public class PopulationStatistics {
 				
 				for(int k=0;k<n;k++){
 					double d=Math.abs( Double.parseDouble(arrayi[k])-Double.parseDouble(arrayj[k]));
-					System.out.println(d);
+					//System.out.println(d);
 					distance[k]=d;
 				}
 				//计算曲线codei和曲线codes_j之间的距离
