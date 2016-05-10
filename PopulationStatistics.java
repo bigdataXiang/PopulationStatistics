@@ -176,11 +176,56 @@ public class PopulationStatistics {
 		//delectRedundantCode("D:/人口数据/0414重新处理/13级数据-将主城区code进行合并/2014CodeStand.txt");
 		//delectFromToCode("D:/人口数据/0414重新处理/21级数据-曲线聚类/1-去掉from和to为同一code的数据/countFlowout-NewCode-replaced-tidy-countAmounts-sort.txt");
 		
-		createCurveData("D:/人口数据/0414重新处理/21级数据-曲线聚类/3-计算流动人口比率/countFlowout-pointRate.txt",
-				         "D:/人口数据/0414重新处理/21级数据-曲线聚类/3-计算流动人口比率/2014CodeStand.txt",1);
+		createCurveData("D:/人口数据/0414重新处理/21级数据-曲线聚类/3-计算流动人口比率/countFlowin-pointRate.txt",
+				         "D:/人口数据/0414重新处理/21级数据-曲线聚类/3-计算流动人口比率/2014CodeStand.txt",0);
 		System.out.println("ok!");
 
 	}
+	public static void curveDistance(String flowfolder,String codefile){
+		Vector<String> Folder= FileTool.Load(flowfolder, "utf-8");
+		Vector<String> CodeFile=FileTool.Load(codefile, "utf-8");
+		Map<String,String[]> map=new HashMap<String,String[]>();
+		Map<Integer,String> indexmap=new HashMap<Integer,String>();
+		//建立一个map，每个code对应一条曲线数组
+		for(int i=0;i<Folder.size();i++){
+			String poi=Folder.elementAt(i);
+			String[] temp=poi.split(":");
+			String code=temp[0];
+			String[] ratearray=temp[1].split(",");
+			map.put(code, ratearray);
+		}
+		//建立一个indexmap，用来检索map中某个具体的code所在的位置
+		for(int i=0;i<CodeFile.size();i++){
+			String code=Tool.getStrByKey(CodeFile.elementAt(i), "<code>", "</code>", "</code>");
+			indexmap.put(i, code);
+		}
+		
+		for(int i=0;i<indexmap.size();i++){
+			String codei=indexmap.get(i);
+			String[] arrayi=map.get(codei);
+			for(int j=i+1;j<indexmap.size();j++){
+				String codej=indexmap.get(j);
+				String[] arrayj=map.get(codej);
+				int n=arrayi.length;
+				int m=arrayj.length;
+				double[] distance=new double[n];
+				
+				for(int k=0;k<n;k++){
+					double d=Math.abs( Double.parseDouble(arrayi[k])-Double.parseDouble(arrayj[k]));
+					distance[k]=d;
+				}
+				
+				double max=Tool.getMaxNum(distance);
+			}
+		}
+		
+	}
+	/**
+	 * 每个code对应生成一条区县L
+	 * @param flowfolder
+	 * @param codefile
+	 * @param n 1为flowout，0为flowin
+	 */
 	public static void createCurveData(String flowfolder,String codefile,int n){
 		Vector<String> Folder= FileTool.Load(flowfolder, "utf-8");
 		Vector<String> CodeFile=FileTool.Load(codefile, "utf-8");
