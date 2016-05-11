@@ -218,9 +218,12 @@ public class PopulationStatistics {
 			}
 			
 		}
-		System.out.println("无效的点的个数有："+invalid);		
+		System.out.println("无效的点的个数有："+invalid);	
 		
-		//初始状态下将所有的code放入同一类曲线C中
+		//建立一个map，用来通过category值索引曲线类
+		Map<Integer,CurveClass> ccmap=new HashMap<Integer,CurveClass>();
+		
+		//初始状态下将所有的code放入同0类曲线中
 		CurveClass cc=new CurveClass();
 		cc.setCategory(0);
 		for(int i=0;i<indexmap.size();i++){
@@ -228,6 +231,10 @@ public class PopulationStatistics {
 			cc.setCodes(code);
 		}
 		addCurveClass(cc);
+		ccmap.put(cc.category, cc);
+		
+		
+		
 		
 		
 		//计算曲线类C的相似精度D(C)
@@ -278,6 +285,51 @@ public class PopulationStatistics {
 		System.out.println(threshold);
 		System.out.println(code);
 		
+		//选取两两之间距离最大的曲线即为a
+		String a=code.substring(code.indexOf("-")+"-".length());
+		
+	    //将曲线a归为1类曲线
+		cc=new CurveClass();
+		cc.setCategory(1);
+		cc.setCodes(a);
+		addCurveClass(cc);
+		ccmap.put(cc.category, cc);
+		
+		//在0类曲线中将a删除
+		cc=new CurveClass();
+		cc=ccmap.get(0);
+		cc.codes.remove(a);
+		
+		//计算0类曲线中各条曲线与曲线a的距离
+		CurveClass cca=new CurveClass();
+		cca=ccmap.get(1);
+		String codea=cca.codes.get(0).toString();
+		String[] arraya=map.get(codea);
+		double[] distance=new double[arraya.length];
+		double[] dismax=new double[arraya.length];
+		String[] codesarray=new String[cc.codes.size()];
+		for(int i=0;i<cc.codes.size();i++){
+			String tempcode=cc.codes.get(0).toString();
+			String[] array=map.get(tempcode);
+			for(int k=0;k<array.length;k++){
+				double d=Math.abs( Double.parseDouble(array[k])-Double.parseDouble(arraya[k]));
+				//System.out.println(d);
+				distance[k]=d;
+			}
+			//计算曲线a与0类曲线中各条曲线的距离
+			int max=Tool.getMaxNum(distance);
+			dismax[i]=distance[max];
+			codesarray[i]=tempcode;
+		}
+		int min=Tool.getMinNum(dismax);
+		String codeb=codesarray[min];
+		
+		//当引入一条新的曲线Li不属于C而得到新的曲线类C′后,要判断是否有D(C′)> D(C)，利用D(C′)的计算公式
+		
+		//计算曲线a和曲线b的距离
+		String[] arryb=map.get(codeb);
+		
+
 		
 		
 	}
