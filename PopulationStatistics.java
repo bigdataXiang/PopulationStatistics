@@ -179,7 +179,7 @@ public class PopulationStatistics {
 		//createCurveData("D:/人口数据/0414重新处理/21级数据-曲线聚类/3-计算流动人口比率/countFlowin-pointRate.txt",
 		//		         "D:/人口数据/0414重新处理/21级数据-曲线聚类/3-计算流动人口比率/2014CodeStand.txt",0);
 		
-		curveDistance("D:/人口数据/0414重新处理/21级数据-曲线聚类/4-计算每个区县的人口流动曲线点/countFlowin-pointRate-curvedata.txt",
+		curveDistance("D:/人口数据/0414重新处理/21级数据-曲线聚类/4-计算每个区县的人口流动曲线点/test.txt",
 				      "D:/人口数据/0414重新处理/21级数据-曲线聚类/4-计算每个区县的人口流动曲线点/2014CodeStand.txt");
 		System.out.println("ok!");
 
@@ -391,7 +391,7 @@ public class PopulationStatistics {
     	 for(int i=0;i<cc.codes.size();i++){
     		 String code=cc.codes.get(i).toString();
     		 String[] array=map.get(code);
-    		 distance[i]=ab_Distance(arraynew,arraynew);   		 
+    		 distance[i]=ab_Distance(arraynew,array);   		 
     	 }
     	 
     	 max_distance=distance[Tool.getMaxNum(distance)];
@@ -439,7 +439,6 @@ public class PopulationStatistics {
 	 */
 	public static void curveDistance(String flowfolder,String codefile){
 		Vector<String> Folder= FileTool.Load(flowfolder, "utf-8");
-		Vector<String> CodeFile=FileTool.Load(codefile, "utf-8");
 		Map<String,String[]> map=new HashMap<String,String[]>();
 		Map<Integer,String> indexmap=new HashMap<Integer,String>();
 		
@@ -473,57 +472,8 @@ public class PopulationStatistics {
 		}
 		addCurveClass(cc);
 		ccmap.put(cc.category, cc);
-
-		/*
-		double[][] DC=new double[indexmap.size()][indexmap.size()];
-		String[][] codes=new String[indexmap.size()][indexmap.size()];
-		double[] Threshold=new double[indexmap.size()];
-		String[] Codes=new String[indexmap.size()];
-		for(int i=0;i<indexmap.size();i++){
-			System.out.println("i="+i+":");
-			String codei=indexmap.get(i);
-			String[] arrayi=map.get(codei);
-			
-			double[] distance=new double[arrayi.length];
-			
-			for(int j=i+1;j<indexmap.size();j++){
-				String codej=indexmap.get(j);
-				String[] arrayj=map.get(codej);
-				int n=arrayi.length;
-				int m=arrayj.length;
-				
-				for(int k=0;k<n;k++){
-					double d=Math.abs( Double.parseDouble(arrayi[k])-Double.parseDouble(arrayj[k]));
-					//System.out.println(d);
-					distance[k]=d;
-				}
-				//计算曲线codei和曲线codes_j之间的距离
-				int max=Tool.getMaxNum(distance);
-				DC[i][j]=distance[max];
-				System.out.println(DC[i][j]);
-				codes[i][j]=codei+"-"+codej;
-				System.out.println(codes[i][j]);
-			}
-			//DC_max为曲线类C(L1,L2..Lm)的相似精度
-			int index=Tool.getMaxNum(DC[i]);
-	        double DC_max=DC[i][index];
-	        String Code_max=codes[i][index];
-	        
-	        Threshold[i]=DC_max;
-	        System.out.println(DC_max);
-	        Codes[i]=Code_max;
-	        System.out.println(Code_max);
-		}
 		
-		int index=Tool.getMaxNum(Threshold);
-		double threshold=Threshold[index];
-		String code=Codes[index];
-		
-		System.out.println(threshold);
-		System.out.println(code);
-		*/
-		
-		//计算曲线类C的相似精度D(C)
+	    //计算曲线类C的相似精度D(C)
 		String[] result=InitialThreshold(indexmap,map);
 		double threshold=Double.parseDouble(result[0]);
 		String code=result[1];
@@ -533,44 +483,10 @@ public class PopulationStatistics {
 		
 	    //将曲线a归为1类曲线
 		addCurve(1,ccmap,a);
-		/*
-		cc=new CurveClass();
-		cc.setCategory(1);
-		cc.setCodes(a);
-		addCurveClass(cc);
-		ccmap.put(cc.category, cc);
-		*/
+		
 		
 		//在0类曲线中将a删除
 		delectCurve(0,ccmap,a);
-		/*
-		cc=new CurveClass();
-		cc=ccmap.get(0);
-		cc.codes.remove(a);
-		*/
-		
-		/*
-		String[] arraya=map.get(codea);
-		double[] distance=new double[arraya.length];
-		double[] dismax=new double[arraya.length];
-		String[] codesarray=new String[cc.codes.size()];
-		for(int i=0;i<cc.codes.size();i++){
-			String tempcode=cc.codes.get(0).toString();
-			String[] array=map.get(tempcode);
-			for(int k=0;k<array.length;k++){
-				double d=Math.abs( Double.parseDouble(array[k])-Double.parseDouble(arraya[k]));
-				//System.out.println(d);
-				distance[k]=d;
-			}
-			//计算曲线a与0类曲线中各条曲线的距离
-			int max=Tool.getMaxNum(distance);
-			dismax[i]=distance[max];
-			codesarray[i]=tempcode;
-		}
-		int min=Tool.getMinNum(dismax);
-		String codeb=codesarray[min];
-		*/
-					
 		
 		
 		//计算0类曲线中各条曲线与1类曲线中曲线a的距离，得到0类中与曲线a距离最近的曲线b
@@ -584,22 +500,12 @@ public class PopulationStatistics {
 		//计算曲线a和曲线b的距离ab_max
 		double ab_distance=newSimilarAccuracy(codeb,1,ccmap,map);
 		ab_distance=ab_Distance(arraya,arryb); //调试时注意上下两个的距离是否一样
-		
-		
-		/*
-		for(int k=0;k<arraya.length;k++){
-			double d=Math.abs( Double.parseDouble(arryb[k])-Double.parseDouble(arraya[k]));
-			//System.out.println(d);
-			distance[k]=d;
-		}
-		double ab_max=distance[Tool.getMaxNum(distance)];
-		*/
-		
+
 		int count=1;
 		CurveClass cc0=new CurveClass();
 		cc0=ccmap.get(0);
 		while(cc0.codes!=null){
-			if(ab_distance>threshold){
+			if(ab_distance>=threshold){
 				//计算曲线类C的相似精度D(C)
 				result=InitialThreshold(indexmap,map);
 				threshold=Double.parseDouble(result[0]);
@@ -635,16 +541,7 @@ public class PopulationStatistics {
 				
 				//求count类曲线的质心
 				double[] curvecentroid=curveCentroid(map,ccmap,count);
-				/*
-				String a1=cc.codes.get(0).toString();
-				String b1=cc.codes.get(1).toString();
-				String[] array_a1=map.get(a1);
-				String[] array_b1=map.get(b1);
-				double[] cc_centroid=new double[array_a1.length];
-				for(int i=0;i<array_a1.length;i++){
-					cc_centroid[i]=(Double.parseDouble(array_a1[i])+Double.parseDouble(array_b1[i]))/2;
-				}
-				*/
+			
 				
 				//在0类曲线中将b删除
 				delectCurve(0,ccmap,codeb);
