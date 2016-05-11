@@ -233,7 +233,7 @@ public class PopulationStatistics {
 	 * 计算曲线a和曲线b的距离
 	 * @param arraya  曲线a对应的点数组
 	 * @param arrayb  曲线b对应的点数组
-	 * @return
+	 * @return 曲线a和曲线b的距离
 	 */
 	public static double ab_Distance(String[] arraya,String [] arrayb){
 		double[] distance= new double[arraya.length];
@@ -287,9 +287,9 @@ public class PopulationStatistics {
 	
 	/**
 	 * 将code对应的曲线加入曲线类k中		
-	 * @param k
-	 * @param ccmap
-	 * @param code
+	 * @param k  曲线类别k
+	 * @param ccmap 用来通过category值索引曲线类,当key为0即索引出0类曲线类
+	 * @param code   要被添加的曲线对应的code值
 	 */
 	public static void addCurve(int k,Map<Integer,CurveClass> ccmap,String code){
 		//将曲线a归为1类曲线
@@ -306,17 +306,22 @@ public class PopulationStatistics {
 			ccmap.put(cc.category, cc);
 		}	
 	}
+
 	/**
 	 * 计算初始类曲线0的相似精度（初始阈值）
-	 * @param indexmap
-	 * @param map
+	 * @param indexmap   用来检索map中某个具体的code所在的位置
+	 * @param map     用来通过code值索引出其对应的曲线点组成的数组
+	 * @return result数组，第0个元素是阈值，第1个元素是距离最大的两条曲线对应的code
 	 */
-	public static void InitialThreshold(Map<Integer,String> indexmap,Map<String,String[]> map){
-
+	public static String[] InitialThreshold(Map<Integer,String> indexmap,Map<String,String[]> map){
+                
+		        String[] result=new String[2];
 				double[][] DC=new double[indexmap.size()][indexmap.size()];
 				String[][] codes=new String[indexmap.size()][indexmap.size()];
 				double[] Threshold=new double[indexmap.size()];
 				String[] Codes=new String[indexmap.size()];
+				
+				//计算两两曲线之间的距离，取最大的距离作为曲线类0的相似精度，即初始阈值
 				for(int i=0;i<indexmap.size();i++){
 					System.out.println("i="+i+":");
 					String codei=indexmap.get(i);
@@ -330,6 +335,12 @@ public class PopulationStatistics {
 						int n=arrayi.length;
 						int m=arrayj.length;
 						
+						DC[i][j]=ab_Distance(arrayi,arrayj);
+						System.out.println(DC[i][j]);
+						codes[i][j]=codei+"-"+codej;
+						System.out.println(codes[i][j]);
+						
+						/*
 						for(int k=0;k<n;k++){
 							double d=Math.abs( Double.parseDouble(arrayi[k])-Double.parseDouble(arrayj[k]));
 							//System.out.println(d);
@@ -337,29 +348,57 @@ public class PopulationStatistics {
 						}
 						//计算曲线codei和曲线codes_j之间的距离
 						int max=Tool.getMaxNum(distance);
-						DC[i][j]=distance[max];
-						System.out.println(DC[i][j]);
-						codes[i][j]=codei+"-"+codej;
-						System.out.println(codes[i][j]);
+						*/	
 					}
-					//DC_max为曲线类C(L1,L2..Lm)的相似精度
-					int index=Tool.getMaxNum(DC[i]);
-			        double DC_max=DC[i][index];
-			        String Code_max=codes[i][index];
+					
+					int index=Tool.getMaxNum(DC[i]);//计算曲线i与其他曲线的距离所生成的数组DC[i]中最大距离所对应的DC[i]数组位置
+			        double DC_max=DC[i][index];  
+			        String Code_max=codes[i][index];//最大距离所对应的两条曲线code
 			        
 			        Threshold[i]=DC_max;
-			        System.out.println(DC_max);
+			       // System.out.println(DC_max);
 			        Codes[i]=Code_max;
-			        System.out.println(Code_max);
-				}
-				
+			       // System.out.println(Code_max);
+				}				
 				int index=Tool.getMaxNum(Threshold);
 				double threshold=Threshold[index];
 				String code=Codes[index];
 				
+				result[0]=Double.toString(threshold);
 				System.out.println(threshold);
+				result[1]=code;
 				System.out.println(code);
+				
+				return result;
 	}
+
+	/**
+	 * 当引入一条不属于C的新的曲线Li而得到新的曲线类C′后,要判断是否有D(C′)大于 D(C),使用式(3)计算新曲线类C′的相似精度
+	 * @param newcode  新曲线Li
+	 * @param k    曲线类别k
+	 * @param ccmap  用来通过category值索引曲线类,当key为0即索引出0类曲线类
+	 * @param map   用来通过code值索引出其对应的曲线点组成的数组
+	 * @return  加入新曲线Li的新曲线类C′的相似精度max_distance
+	 */
+    public static double newSimilarAccuracy(String newcode,int k,Map<Integer,CurveClass> ccmap,Map<String,String[]> map){
+    	 CurveClass cc=new  CurveClass();
+    	 cc=ccmap.get(k);
+    	 
+    	 String[] arraynew=map.get(newcode);
+    	 double[] distance=new double[cc.codes.size()];
+    	 double max_distance=0;
+    	 
+    	 for(int i=0;i<cc.codes.size();i++){
+    		 String code=cc.codes.get(i).toString();
+    		 String[] array=map.get(code);
+    		 distance[i]=ab_Distance(arraynew,arraynew);   		 
+    	 }
+    	 
+    	 max_distance=distance[Tool.getMaxNum(distance)];
+    	 
+    	 return max_distance;
+    }
+
 	/**
 	 * 
 	 * @param flowfolder
@@ -401,12 +440,8 @@ public class PopulationStatistics {
 		}
 		addCurveClass(cc);
 		ccmap.put(cc.category, cc);
-		
-		
-		
-		
-		
-		//计算曲线类C的相似精度D(C)
+
+		/*
 		double[][] DC=new double[indexmap.size()][indexmap.size()];
 		String[][] codes=new String[indexmap.size()][indexmap.size()];
 		double[] Threshold=new double[indexmap.size()];
@@ -453,6 +488,12 @@ public class PopulationStatistics {
 		
 		System.out.println(threshold);
 		System.out.println(code);
+		*/
+		
+		//计算曲线类C的相似精度D(C)
+		String[] result=InitialThreshold(indexmap,map);
+		double threshold=Double.parseDouble(result[0]);
+		String code=result[1];
 		
 		//选取两两之间距离最大的曲线即为a
 		String a=code.substring(code.indexOf("-")+"-".length());
@@ -475,10 +516,6 @@ public class PopulationStatistics {
 		cc.codes.remove(a);
 		*/
 		
-		//计算0类曲线中各条曲线与曲线a的距离		
-		CurveClass cca=new CurveClass();
-		cca=ccmap.get(1);
-		String codea=cca.codes.get(0).toString();
 		/*
 		String[] arraya=map.get(codea);
 		double[] distance=new double[arraya.length];
@@ -500,14 +537,22 @@ public class PopulationStatistics {
 		int min=Tool.getMinNum(dismax);
 		String codeb=codesarray[min];
 		*/
+					
 		
-		//当引入一条新的曲线Li不属于C而得到新的曲线类C′后,要判断是否有D(C′)> D(C)，利用D(C′)的计算公式
 		
-		//计算曲线a和曲线b的距离ab_max
+		//计算0类曲线中各条曲线与1类曲线中曲线a的距离，得到0类中与曲线a距离最近的曲线b
+		CurveClass cca=new CurveClass();
+		cca=ccmap.get(1);
+		String codea=cca.codes.get(0).toString();
 		String codeb=curve0_iDistance(map,cc,codea);
 		String[] arryb=map.get(codeb);
 		String[] arraya=map.get(codea);
-		double ab_distance=ab_Distance(arraya,arryb);
+		
+		//计算曲线a和曲线b的距离ab_max
+		double ab_distance=newSimilarAccuracy(codeb,1,ccmap,map);
+		ab_distance=ab_Distance(arraya,arryb); //调试时注意上下两个的距离是否一样
+		
+		
 		/*
 		for(int k=0;k<arraya.length;k++){
 			double d=Math.abs( Double.parseDouble(arryb[k])-Double.parseDouble(arraya[k]));
@@ -550,11 +595,16 @@ public class PopulationStatistics {
 			
 			
 		}
-		
-
-		
-		
 	}
+	
+
+
+
+	
+	
+	
+	
+	
 	/**
 	 * 每个code对应生成一条区县L
 	 * @param flowfolder
