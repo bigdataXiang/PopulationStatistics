@@ -211,7 +211,7 @@ public class PopulationStatistics {
 				double[] dismax=new double[cc.codes.size()];//用于承载0类曲线中不同曲线与a曲线的距离
 				String[] codesarray=new String[cc.codes.size()];//用于承载dismax数组中的元素（某曲线与a曲线的距离）对应的code值
 				for(int i=0;i<cc.codes.size();i++){
-					String tempcode=cc.codes.get(0).toString();
+					String tempcode=cc.codes.get(i).toString();
 					String[] array=map.get(tempcode);
 					for(int k=0;k<array.length;k++){
 						double d=Math.abs( Double.parseDouble(array[k])-Double.parseDouble(arraya[k]));
@@ -398,6 +398,39 @@ public class PopulationStatistics {
     	 
     	 return max_distance;
     }
+    /**
+     * 计算曲线类count的质心曲线与曲线类0的各个曲线的距离，并返回最小值
+     * @param map   用来通过code值索引出其对应的曲线点组成的数组
+     * @param ccmap   用来通过category值索引曲线类,当key为0即索引出0类曲线类
+     * @param centroid  曲线类count的质心曲线对应的点数组
+     * @return  曲线类count的质心曲线与曲线类0的各个曲线的距离最小值对应的code
+     */
+    public static String curve0_centroidDistance(Map<String,String[]> map,Map<Integer,CurveClass> ccmap,double[] centroid){
+    	
+    	CurveClass cc=new CurveClass();
+    	cc=ccmap.get(0);
+		double[] distance=new double[centroid.length];//用于承载0类曲线中的某曲线与a曲线对应点的差值的绝对值
+		double[] dismax=new double[cc.codes.size()];//用于承载0类曲线中不同曲线与a曲线的距离
+		String[] codesarray=new String[cc.codes.size()];//用于承载dismax数组中的元素（某曲线与a曲线的距离）对应的code值
+		for(int i=0;i<cc.codes.size();i++){
+			String tempcode=cc.codes.get(i).toString();
+			String[] array=map.get(tempcode);
+			for(int k=0;k<array.length;k++){
+				double d=Math.abs( Double.parseDouble(array[k])-centroid[k]);
+				//System.out.println(d);
+				distance[k]=d;
+			}
+			//计算曲线a与0类曲线中各条曲线的距离
+			int max=Tool.getMaxNum(distance);
+			dismax[i]=distance[max];
+			codesarray[i]=tempcode;
+		}
+		//计算0类曲线中与曲线a距离最小的曲线
+		int min=Tool.getMinNum(dismax);
+		String codeb=codesarray[min];
+		
+		return codeb;
+    }
 
 	/**
 	 * 
@@ -562,49 +595,69 @@ public class PopulationStatistics {
 		double ab_max=distance[Tool.getMaxNum(distance)];
 		*/
 		
-		if(ab_distance>threshold){
-			
-		}else{
-			//将曲线b归为1类曲线
-			cc=new CurveClass();
-			cc.setCategory(1);
-			cc.setCodes(codeb);
-			addCurveClass(cc);
-			ccmap.put(cc.category, cc);
-			
-			//求1类曲线的质心
-			curveCentroid(map,ccmap,1);
-			/*
-			String a1=cc.codes.get(0).toString();
-			String b1=cc.codes.get(1).toString();
-			String[] array_a1=map.get(a1);
-			String[] array_b1=map.get(b1);
-			double[] cc_centroid=new double[array_a1.length];
-			for(int i=0;i<array_a1.length;i++){
-				cc_centroid[i]=(Double.parseDouble(array_a1[i])+Double.parseDouble(array_b1[i]))/2;
+		int count=1;
+		CurveClass cc0=new CurveClass();
+		cc0=ccmap.get(0);
+		while(cc0.codes!=null){
+			if(ab_distance>threshold){
+				//计算曲线类C的相似精度D(C)
+				result=InitialThreshold(indexmap,map);
+				threshold=Double.parseDouble(result[0]);
+				code=result[1];
+				
+				//选取两两之间距离最大的曲线即为a
+	            a=code.substring(code.indexOf("-")+"-".length());
+				
+			    //将曲线a归为count类曲线
+	            count++;
+				addCurve(count,ccmap,a);
+				
+				//在0类曲线中将a删除
+				delectCurve(0,ccmap,a);
+				
+				//计算0类曲线中各条曲线与count类曲线中曲线a的距离，得到0类中与曲线a距离最近的曲线b
+				cca=new CurveClass();
+				cca=ccmap.get(count);
+				codea=cca.codes.get(0).toString();
+				codeb=curve0_iDistance(map,cc,codea);
+				arryb=map.get(codeb);
+				arraya=map.get(codea);
+				
+				//计算曲线a和曲线b的距离ab_max
+				ab_distance=newSimilarAccuracy(codeb,1,ccmap,map);
+				ab_distance=ab_Distance(arraya,arryb); //调试时注意上下两个的距离是否一样
+				
+			}else{
+				//将曲线b归为count类曲线
+				cc=ccmap.get(count);
+				cc.setCodes(codeb);
+				addCurveClass(cc);
+				
+				//求count类曲线的质心
+				double[] curvecentroid=curveCentroid(map,ccmap,count);
+				/*
+				String a1=cc.codes.get(0).toString();
+				String b1=cc.codes.get(1).toString();
+				String[] array_a1=map.get(a1);
+				String[] array_b1=map.get(b1);
+				double[] cc_centroid=new double[array_a1.length];
+				for(int i=0;i<array_a1.length;i++){
+					cc_centroid[i]=(Double.parseDouble(array_a1[i])+Double.parseDouble(array_b1[i]))/2;
+				}
+				*/
+				
+				//在0类曲线中将b删除
+				delectCurve(0,ccmap,codeb);
+				
+				//在曲线类0中,计算各条曲线与曲线类count(曲线质心)的距离，得到最小距离对应的codeb
+				codeb=curve0_centroidDistance(map,ccmap,curvecentroid);
+				
+				ab_distance=newSimilarAccuracy(codeb,count,ccmap,map);	
 			}
-			*/
-			
-			//在0类曲线中将b删除
-			cc=new CurveClass();
-			cc=ccmap.get(0);
-			cc.codes.remove(codeb);
-			
-			//在曲线集合0中,计算各条曲线与曲线类1(曲线质心)的距离
-           
-			
-			
 		}
+		
 	}
-	
 
-
-
-	
-	
-	
-	
-	
 	/**
 	 * 每个code对应生成一条区县L
 	 * @param flowfolder
