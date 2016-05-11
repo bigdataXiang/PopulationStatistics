@@ -196,6 +196,175 @@ public class PopulationStatistics {
 		curveclass.add(cc);
 
 	}
+	//	 * @param ccmap 用来通过category值索引曲线类,当key为0即索引出0类曲线类
+	/**
+	 * 计算0类曲线中各条曲线与曲线a的距离
+	 * @param map    用来通过code值索引出其对应的曲线点组成的数组
+	 * @param cc     即原始曲线类0；
+	 * @param codea  即曲线a对应的code
+	 * @return    0类曲线中与曲线a的距离最小的曲线对应的code
+	 */
+	public static String curve0_iDistance(Map<String,String[]> map,CurveClass cc,String codea){
+
+				String[] arraya=map.get(codea);//通过曲线a的code获得曲线a的点数组
+				double[] distance=new double[arraya.length];//用于承载0类曲线中的某曲线与a曲线对应点的差值的绝对值
+				double[] dismax=new double[cc.codes.size()];//用于承载0类曲线中不同曲线与a曲线的距离
+				String[] codesarray=new String[cc.codes.size()];//用于承载dismax数组中的元素（某曲线与a曲线的距离）对应的code值
+				for(int i=0;i<cc.codes.size();i++){
+					String tempcode=cc.codes.get(0).toString();
+					String[] array=map.get(tempcode);
+					for(int k=0;k<array.length;k++){
+						double d=Math.abs( Double.parseDouble(array[k])-Double.parseDouble(arraya[k]));
+						//System.out.println(d);
+						distance[k]=d;
+					}
+					//计算曲线a与0类曲线中各条曲线的距离
+					int max=Tool.getMaxNum(distance);
+					dismax[i]=distance[max];
+					codesarray[i]=tempcode;
+				}
+				//计算0类曲线中与曲线a距离最小的曲线
+				int min=Tool.getMinNum(dismax);
+				String codeb=codesarray[min];
+				
+				return codeb;
+	}
+	/**
+	 * 计算曲线a和曲线b的距离
+	 * @param arraya  曲线a对应的点数组
+	 * @param arrayb  曲线b对应的点数组
+	 * @return
+	 */
+	public static double ab_Distance(String[] arraya,String [] arrayb){
+		double[] distance= new double[arraya.length];
+		for(int k=0;k<arraya.length;k++){
+			double d=Math.abs( Double.parseDouble(arrayb[k])-Double.parseDouble(arraya[k]));
+			//System.out.println(d);
+			distance[k]=d;
+		}
+		double ab_max=distance[Tool.getMaxNum(distance)];
+		return ab_max;
+	}
+	
+	/**
+	 * 求K类曲线的质心曲线
+	 * @param map  用来通过code值索引出其对应的曲线点组成的数组
+	 * @param ccmap  用来通过category值索引曲线类,当key为0即索引出0类曲线类
+	 * @param k    曲线类别k
+	 * @return  曲线类k的质心曲线对应的点数组
+	 */
+	public static double[] curveCentroid(Map<String,String[]> map,Map<Integer,CurveClass> ccmap,int k){
+		//求1类曲线的质心
+		CurveClass cc=new CurveClass();
+		cc=ccmap.get(k);
+		int length=map.get(cc.codes.get(0).toString()).length;
+		
+		//定义centroid为质心曲线对应的点数组
+		double[] centroid=new double[length];
+		
+		for(int i=0;i<length;i++){
+			centroid[i]=0;			
+			for(int j=0;j<cc.codes.size();j++){
+				String[] array=map.get(cc.codes.get(j).toString());
+				centroid[i]+=Double.parseDouble(array[i]);
+			}
+			centroid[i]=centroid[i]/cc.codes.size();
+		}
+		return centroid;
+	}
+	/**
+	 * 在k类曲线中将code对应的曲线删掉
+	 * @param k   曲线类别k
+	 * @param ccmap   用来通过category值索引曲线类,当key为0即索引出0类曲线类
+	 * @param code    要被删除的曲线对应的code值
+	 */
+	public static void delectCurve(int k,Map<Integer,CurveClass> ccmap,String code){
+
+		CurveClass cc=new CurveClass();
+		cc=ccmap.get(k);
+		cc.codes.remove(code);
+	}
+	
+	/**
+	 * 将code对应的曲线加入曲线类k中		
+	 * @param k
+	 * @param ccmap
+	 * @param code
+	 */
+	public static void addCurve(int k,Map<Integer,CurveClass> ccmap,String code){
+		//将曲线a归为1类曲线
+		CurveClass cc=new CurveClass();
+		
+		if(ccmap.get(k)!=null){
+			cc=ccmap.get(k);
+			cc.setCodes(code);
+			addCurveClass(cc);
+		}else{
+			cc.setCategory(k);
+			cc.setCodes(code);
+			addCurveClass(cc);
+			ccmap.put(cc.category, cc);
+		}	
+	}
+	/**
+	 * 计算初始类曲线0的相似精度（初始阈值）
+	 * @param indexmap
+	 * @param map
+	 */
+	public static void InitialThreshold(Map<Integer,String> indexmap,Map<String,String[]> map){
+
+				double[][] DC=new double[indexmap.size()][indexmap.size()];
+				String[][] codes=new String[indexmap.size()][indexmap.size()];
+				double[] Threshold=new double[indexmap.size()];
+				String[] Codes=new String[indexmap.size()];
+				for(int i=0;i<indexmap.size();i++){
+					System.out.println("i="+i+":");
+					String codei=indexmap.get(i);
+					String[] arrayi=map.get(codei);
+					
+					double[] distance=new double[arrayi.length];
+					
+					for(int j=i+1;j<indexmap.size();j++){
+						String codej=indexmap.get(j);
+						String[] arrayj=map.get(codej);
+						int n=arrayi.length;
+						int m=arrayj.length;
+						
+						for(int k=0;k<n;k++){
+							double d=Math.abs( Double.parseDouble(arrayi[k])-Double.parseDouble(arrayj[k]));
+							//System.out.println(d);
+							distance[k]=d;
+						}
+						//计算曲线codei和曲线codes_j之间的距离
+						int max=Tool.getMaxNum(distance);
+						DC[i][j]=distance[max];
+						System.out.println(DC[i][j]);
+						codes[i][j]=codei+"-"+codej;
+						System.out.println(codes[i][j]);
+					}
+					//DC_max为曲线类C(L1,L2..Lm)的相似精度
+					int index=Tool.getMaxNum(DC[i]);
+			        double DC_max=DC[i][index];
+			        String Code_max=codes[i][index];
+			        
+			        Threshold[i]=DC_max;
+			        System.out.println(DC_max);
+			        Codes[i]=Code_max;
+			        System.out.println(Code_max);
+				}
+				
+				int index=Tool.getMaxNum(Threshold);
+				double threshold=Threshold[index];
+				String code=Codes[index];
+				
+				System.out.println(threshold);
+				System.out.println(code);
+	}
+	/**
+	 * 
+	 * @param flowfolder
+	 * @param codefile
+	 */
 	public static void curveDistance(String flowfolder,String codefile){
 		Vector<String> Folder= FileTool.Load(flowfolder, "utf-8");
 		Vector<String> CodeFile=FileTool.Load(codefile, "utf-8");
@@ -289,21 +458,28 @@ public class PopulationStatistics {
 		String a=code.substring(code.indexOf("-")+"-".length());
 		
 	    //将曲线a归为1类曲线
+		addCurve(1,ccmap,a);
+		/*
 		cc=new CurveClass();
 		cc.setCategory(1);
 		cc.setCodes(a);
 		addCurveClass(cc);
 		ccmap.put(cc.category, cc);
+		*/
 		
 		//在0类曲线中将a删除
+		delectCurve(0,ccmap,a);
+		/*
 		cc=new CurveClass();
 		cc=ccmap.get(0);
 		cc.codes.remove(a);
+		*/
 		
-		//计算0类曲线中各条曲线与曲线a的距离
+		//计算0类曲线中各条曲线与曲线a的距离		
 		CurveClass cca=new CurveClass();
 		cca=ccmap.get(1);
 		String codea=cca.codes.get(0).toString();
+		/*
 		String[] arraya=map.get(codea);
 		double[] distance=new double[arraya.length];
 		double[] dismax=new double[arraya.length];
@@ -323,11 +499,57 @@ public class PopulationStatistics {
 		}
 		int min=Tool.getMinNum(dismax);
 		String codeb=codesarray[min];
+		*/
 		
 		//当引入一条新的曲线Li不属于C而得到新的曲线类C′后,要判断是否有D(C′)> D(C)，利用D(C′)的计算公式
 		
-		//计算曲线a和曲线b的距离
+		//计算曲线a和曲线b的距离ab_max
+		String codeb=curve0_iDistance(map,cc,codea);
 		String[] arryb=map.get(codeb);
+		String[] arraya=map.get(codea);
+		double ab_distance=ab_Distance(arraya,arryb);
+		/*
+		for(int k=0;k<arraya.length;k++){
+			double d=Math.abs( Double.parseDouble(arryb[k])-Double.parseDouble(arraya[k]));
+			//System.out.println(d);
+			distance[k]=d;
+		}
+		double ab_max=distance[Tool.getMaxNum(distance)];
+		*/
+		
+		if(ab_distance>threshold){
+			
+		}else{
+			//将曲线b归为1类曲线
+			cc=new CurveClass();
+			cc.setCategory(1);
+			cc.setCodes(codeb);
+			addCurveClass(cc);
+			ccmap.put(cc.category, cc);
+			
+			//求1类曲线的质心
+			curveCentroid(map,ccmap,1);
+			/*
+			String a1=cc.codes.get(0).toString();
+			String b1=cc.codes.get(1).toString();
+			String[] array_a1=map.get(a1);
+			String[] array_b1=map.get(b1);
+			double[] cc_centroid=new double[array_a1.length];
+			for(int i=0;i<array_a1.length;i++){
+				cc_centroid[i]=(Double.parseDouble(array_a1[i])+Double.parseDouble(array_b1[i]))/2;
+			}
+			*/
+			
+			//在0类曲线中将b删除
+			cc=new CurveClass();
+			cc=ccmap.get(0);
+			cc.codes.remove(codeb);
+			
+			//在曲线集合0中,计算各条曲线与曲线类1(曲线质心)的距离
+           
+			
+			
+		}
 		
 
 		
