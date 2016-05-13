@@ -323,7 +323,7 @@ public class PopulationStatistics {
 				
 				//计算两两曲线之间的距离，取最大的距离作为曲线类0的相似精度，即初始阈值
 				for(int i=0;i<indexmap.size();i++){
-					System.out.println("i="+i+":");
+					//System.out.println("i="+i+":");
 					String codei=indexmap.get(i);
 					String[] arrayi=map.get(codei);
 					
@@ -336,9 +336,9 @@ public class PopulationStatistics {
 						int m=arrayj.length;
 						
 						DC[i][j]=ab_Distance(arrayi,arrayj);
-						System.out.println(DC[i][j]);
+						//System.out.println(DC[i][j]);
 						codes[i][j]=codei+"-"+codej;
-						System.out.println(codes[i][j]);
+						//System.out.println(codes[i][j]);
 						
 						/*
 						for(int k=0;k<n;k++){
@@ -481,6 +481,9 @@ public class PopulationStatistics {
 		//选取两两之间距离最大的曲线即为a
 		String a=code.substring(code.indexOf("-")+"-".length());
 		
+		//curve0是指初始0类曲线中两两距离最大的曲线中仍然留在0类曲线中的那条曲线
+		String curve0=code.substring(0,code.indexOf("-"));
+		
 	    //将曲线a归为1类曲线
 		addCurve(1,ccmap,a);
 		
@@ -502,36 +505,41 @@ public class PopulationStatistics {
 		ab_distance=ab_Distance(arraya,arryb); //调试时注意上下两个的距离是否一样
 
 		int count=1;
+		
 		CurveClass cc0=new CurveClass();
-		cc0=ccmap.get(0);
-		while(cc0.codes!=null){
+		cc0=ccmap.get(0);//0类曲线
+		
+		while(cc0.codes.size()>1){
 			if(ab_distance>=threshold){
-				//计算曲线类C的相似精度D(C)
-				result=InitialThreshold(indexmap,map);
-				threshold=Double.parseDouble(result[0]);
-				code=result[1];
+			//	if(cc0.codes.size()>1){
+					//计算曲线类C的相似精度D(C)
+					result=InitialThreshold(indexmap,map);
+					threshold=Double.parseDouble(result[0]);
+					code=result[1];
+					
+					//选取两两之间距离最大的曲线即为a
+		            a=code.substring(code.indexOf("-")+"-".length());
+					
+				    //将曲线a归为count类曲线
+		            count++;
+					addCurve(count,ccmap,a);
+					
+					//在0类曲线中将a删除
+					delectCurve(0,ccmap,a);
+					
+					//计算0类曲线中各条曲线与count类曲线中曲线a的距离，得到0类中与曲线a距离最近的曲线b
+					cca=new CurveClass();
+					cca=ccmap.get(count);
+					codea=cca.codes.get(0).toString();
+					codeb=curve0_iDistance(map,cc,codea);
+					arryb=map.get(codeb);
+					arraya=map.get(codea);
+					
+					//计算曲线a和曲线b的距离ab_max
+					ab_distance=newSimilarAccuracy(codeb,1,ccmap,map);
+					ab_distance=ab_Distance(arraya,arryb); //调试时注意上下两个的距离是否一样
+			//	}
 				
-				//选取两两之间距离最大的曲线即为a
-	            a=code.substring(code.indexOf("-")+"-".length());
-				
-			    //将曲线a归为count类曲线
-	            count++;
-				addCurve(count,ccmap,a);
-				
-				//在0类曲线中将a删除
-				delectCurve(0,ccmap,a);
-				
-				//计算0类曲线中各条曲线与count类曲线中曲线a的距离，得到0类中与曲线a距离最近的曲线b
-				cca=new CurveClass();
-				cca=ccmap.get(count);
-				codea=cca.codes.get(0).toString();
-				codeb=curve0_iDistance(map,cc,codea);
-				arryb=map.get(codeb);
-				arraya=map.get(codea);
-				
-				//计算曲线a和曲线b的距离ab_max
-				ab_distance=newSimilarAccuracy(codeb,1,ccmap,map);
-				ab_distance=ab_Distance(arraya,arryb); //调试时注意上下两个的距离是否一样
 				
 			}else{
 				//将曲线b归为count类曲线
@@ -551,6 +559,17 @@ public class PopulationStatistics {
 				
 				ab_distance=newSimilarAccuracy(codeb,count,ccmap,map);	
 			}
+		}
+		
+		System.out.println("总共有"+ccmap.size()+"类曲线");
+		for(int i=0;i<ccmap.size();i++){
+			cc=new CurveClass();
+			cc=ccmap.get(i);
+			System.out.println(cc.category);
+			for(int j=0;j<cc.codes.size();j++){
+				System.out.println(cc.codes.get(j));
+			}
+			
 		}
 		
 	}
